@@ -1,0 +1,38 @@
+.withdraw_box{
+    height: 100vh;
+}
+
+.withdraw_box input{
+    width: 632px;
+    height: 68px;
+    text-align: right;
+    border: none;
+    font-family: Inter;
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 21px;
+    padding-right: 24px;
+    border-radius: 9px;
+    box-sizing: border-box;
+    margin-top: 30px;
+}
+
+.withdraw_box .withdraw_inp{
+    margin-top: 100px;
+}
+
+.withdraw_box .buy_btn{
+    width: 632px;
+    height: 56px;
+    border-radius: 9px;
+    background: #2C08A6;
+    font-family: Inter;
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 21px;
+    text-align: center;
+    color: #FFFFFF;
+    box-shadow: 0px 4px 14px 0px #0000001A;
+    cursor: pointer;
+    margin: 60px 0;
+}

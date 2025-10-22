@@ -1,0 +1,104 @@
+.doc_box_h5{
+    background-color: #fff;
+    width: 100%;
+    overflow: hidden;
+}
+
+.doc_box_h5 .logo_box{
+    font-family: tetriSolFont;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 18px;
+    letter-spacing: 0px;
+    text-align: right;
+    height: 60px;
+    padding: 0 14px;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.doc_box_h5 .logo_box a{
+    text-decoration: none;
+    color: #333333;
+}
+
+.doc_box_h5 .logo_box img{
+    height: 21px;
+    width: 21px;
+    margin-right: 4px;
+}
+
+.doc_box_h5 .logo_box .tabs_icon{
+    width: 17px;
+    height: 12px;
+    position: absolute;
+    right: 18px;
+    z-index: 1;
+    cursor: pointer;
+}
+
+/* 下拉内容 (默认隐藏) */
+.dropdown-content {
+    position: absolute;
+    right: -200px;
+    top: 40px;
+    background-color: #ffffff;
+    width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    transition: all linear .3s;
+    border-radius: 10px;
+    overflow: hidden;
+}
+   
+/* 鼠标悬停时显示下拉内容 */
+.show_drop {
+    right: 0px;
+}
+   
+/* 链接样式 */
+.dropdown-content div {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    text-align: left;
+}
+
+.dropdown-content .choice_box_h5{
+    background-color: #BD00FF;
+    color: #fff;
+    box-shadow: 0px 12px 30px 0px #BD00FF33;
+}
+
+.doc_box_h5 .img_box_h5{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    position: relative;
+}
+
+.doc_box_h5 .img_box_h5 img{
+    width: 351px;
+}
+
+.doc_box_h5 .img_box_h5 .link_url_h5{
+    position: absolute;
+    color: transparent;
+    z-index: 1;
+}
+
+.doc_box_h5 .img_box_h5 .link_url_h5:nth-child(2){
+    top: 290px;
+    left: 12px;
+}
+
+.doc_box_h5 .img_box_h5 .link_url_h5:nth-child(3){
+    top: 320px;
+    left: 12px;
+}
+
+.doc_box_h5 .img_box_h5 .link_url_h5:nth-child(4){
+    top: 350px;
+    left: 12px;
+}

@@ -1,0 +1,89 @@
+.doc_box{
+    width: 100%;
+    /* height: 1940px; */
+    background-color: #fff;
+    padding-bottom: 110px;
+    box-sizing: border-box;
+}
+
+.doc_box .logo_box{
+    font-family: tetriSolFont;
+    font-size: 29px;
+    font-weight: 400;
+    line-height: 40px;
+    letter-spacing: 0px;
+    /* margin-left: 96px; */
+    height: 133px;
+    width: 1420px;
+}
+
+.doc_box .logo_box a{
+    text-decoration: none;
+    color: #333333;
+}
+
+.doc_box .logo_box img{
+    height: 50px;
+    width: 50px;
+    margin-right: 14px;
+}
+
+.doc_box .cont_box {
+    display: flex;
+    justify-content: center;
+}
+
+.doc_box .left_tab_box{
+    
+}
+
+.doc_box .left_tab_box .tab_box{
+    width: 258px;
+    height: 54px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-family: tetriSolFont;
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 54px;
+    letter-spacing: 0em;
+    text-align: center;
+    color: #666666;
+    cursor: pointer;
+    transition: all ease-in-out .3s;
+}
+
+.doc_box .left_tab_box .choice_box{
+    background-color: #BD00FF;
+    color: #fff;
+    box-shadow: 0px 12px 30px 0px #BD00FF33;
+}
+
+.doc_box .cont_box .right_box{
+    width: 1140px;
+    margin-left: 85px;
+}
+
+.doc_box .cont_box .right_box img{
+    width: 1140px;
+}
+
+.doc_box .cont_box .right_box .img_box{
+    transition: all ease-in-out .3s;
+}
+
+.doc_box .cont_box .right_box .img_box .link_url{
+    font-family: tetriSolFont;
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 40px;
+    letter-spacing: 0em;
+    text-align: left;
+    color: #333333;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.doc_box .cont_box .right_box .img_box .link_url:hover{
+    color: #BD00FF;
+}

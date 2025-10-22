@@ -1,0 +1,13 @@
+@font-face {
+    font-family: 'tetriSolFont';
+    src: url('./PingFang Medium.ttf');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Inter';
+    src: url('./inter.ttf');
+    font-weight: normal;
+    font-style: normal;
+}
+  

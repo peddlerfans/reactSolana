@@ -1,0 +1,583 @@
+
+.top_title{
+    font-family: tetriSolFont;
+    font-size: 50px;
+    font-weight: 400;
+    line-height: 75px;
+    letter-spacing: 0em;
+    text-align: left;
+    color: #ffffff;
+    margin-top: 124px;
+}
+.top_cont{
+    font-family: tetriSolFont;
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 27px;
+    letter-spacing: 0em;
+    text-align: left;
+    color: #ffffff;
+    width: 846px;
+    margin-top: 68px;
+}
+
+.doc_btn{
+    width: 130px;
+    height: 44px;
+    border-radius: 22px;
+    background: linear-gradient(90deg, #FF7952 0%, #FFD151 100%);
+    font-family: tetriSolFont;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 22px;
+    color: #ffffff;
+    margin-top: 58px;
+    cursor: pointer;
+}
+
+.doc_btn a{
+    text-decoration: none;
+    color: #ffffff;
+}
+
+.wallet_box{
+    margin-top: 144px;
+}
+
+.wallet_box .main_box{
+    width: 706px;
+    height: 784px;
+    border-radius: 56px;
+    background-color: #fff;
+    padding: 50px 42px 0 32px;
+    box-sizing: border-box;
+}
+
+.wallet_box .main_box .value_box{
+    width: 631.72px;
+    height: 62.99px;
+    border-radius: 9px;
+    background-color: #E4DCFF;
+    padding: 0 20px;
+    box-sizing: border-box;
+    margin-bottom: 22px;
+}
+
+.wallet_box .main_box .value_box span{
+    font-family: Inter;
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 21px;
+    letter-spacing: 0px;
+    text-align: center;
+
+}
+.wallet_box .main_box .inp_box{
+    width: 632px;
+    height: 68px;
+    border-radius: 9px;
+    background: #FFFFFF;
+    box-shadow: 5px 10px 20px 0px #0000001A;
+    margin-bottom: 45px;
+}
+.wallet_box .main_box .inp_box input{
+    width: 632px;
+    height: 68px;
+    text-align: right;
+    border: none;
+    font-family: Inter;
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 21px;
+    padding-right: 24px;
+    border-radius: 9px;
+    box-sizing: border-box;
+}
+.wallet_box .main_box .buy_btn{
+    width: 632px;
+    height: 56px;
+    border-radius: 9px;
+    background: #2C08A6;
+    font-family: Inter;
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 21px;
+    text-align: center;
+    color: #FFFFFF;
+    box-shadow: 0px 4px 14px 0px #0000001A;
+    cursor: pointer;
+}
+
+.wallet_box .main_box .user_data{
+    margin-top: 54px;
+    font-family: Inter;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 21px;
+    letter-spacing: 0px;
+
+}
+
+.wallet_box .main_box .re_buy_box{
+    margin-top: 38px;
+}
+
+.wallet_box .main_box .re_buy_box div{
+    width: 230px;
+    height: 52px;
+    border-radius: 9px;
+    background: #7A53FF;
+    box-shadow: 0px 4px 14px 0px #0000001A;
+    font-family: Inter;
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 21px;
+    letter-spacing: 0px;
+    text-align: center;
+    color: #ffffff;
+    cursor: pointer;
+}
+
+.wallet_box .val_box{
+    width: 454px;
+    height: 372px;
+    border-radius: 56px;
+    background-color: #fff;
+    padding: 60px 48px 0 52px;
+    box-sizing: border-box;
+}
+
+.wallet_box .val_box div{
+    font-family: Inter;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 21px;
+    letter-spacing: -0.4px;
+    text-align: left;
+}
+
+.wallet_box .val_box .title{
+    font-family: Inter;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 21px;
+    letter-spacing: -0.4px;
+    text-align: left;
+}
+
+.wallet_box .val_box .lit{
+    font-family: Inter;
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 21px;
+    letter-spacing: 0px;
+    margin-bottom: 32px;
+}
+.wallet_box .val_box .lit:nth-child(2){
+    margin-top: 68px;
+}
+
+.wallet_box .val_box input{
+    width: 369.87px;
+    height: 66px;
+    border-radius: 16px;
+    border: 1px solid #000000;
+    font-family: Inter;
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 21px;
+    letter-spacing: 0px;
+    text-align: left;
+    padding-left: 21px;
+    box-sizing: border-box;
+    margin-top: 34px;
+}
+
+.wallet_box .val_box .copy_btn{
+    width: 230px;
+    height: 46px;
+    border-radius: 9px;
+    box-shadow: 0px 4px 13.699999809265137px 0px #0000001A;
+    background-color: #7A53FF;
+    font-family: Inter;
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 21px;
+    letter-spacing: 0px;
+    text-align: center;
+    color: #ffffff;
+    margin-top: 26px;
+    cursor: pointer;
+}
+
+.wallet_box .val_box .tips{
+    font-family: tetriSolFont;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 23px;
+    letter-spacing: 0px;
+    text-align: center;
+    color: #666666;
+    margin-top: 24px;
+}
+
+.rate_box{
+    width: 1200px;
+    height: 928px;
+    border-radius: 50px;
+    background-color: #fff;
+    margin-top: 150px;
+    padding: 72px 0 0 56px;
+    box-sizing: border-box;
+}
+
+.rate_box .tetris_box{
+    width: 110px;
+    height: 178px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    margin-right: 4px;
+    padding-top: 6px;
+    box-sizing: border-box;
+}
+
+.rate_box .choice_bg{
+    background-image: url('/src/static/image/tetris_bg.png');
+    background-size: 110px 178px;
+    background-repeat: no-repeat;
+}
+
+.rate_box .tetris_box .tetris_img{
+    width: 90px;
+    height: 90px;
+}
+
+.rate_box .tetris_box .number_box{
+    width: 90px;
+    height: 42px;
+    border-radius: 10px;
+    box-shadow: 4px 4px 10.5px 0px #00000040;
+    margin-top: 26px;
+}
+
+.rate_box .tetris_box .number_box img{
+    width: 18px;
+    height: 18px;
+}
+
+.rate_box .mount_box{
+    width: 274px;
+    height: 218px;
+    border-radius: 21px;
+    background-color: #271260;
+    margin-left: 20px;
+}
+
+.rate_box .mount_box .logo_box{
+    color: #ffffff;
+    font-family: tetriSolFont;
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 18px;
+    margin-top: 24px;
+}
+
+.rate_box .mount_box .logo_box div{
+    width: 40px;
+    height: 40px;
+    background-color: #fff;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.rate_box .mount_box .logo_box img{
+    width: 30px;
+    height: 30px;
+}
+
+.rate_box .mount_box .amount{
+    font-family: tetriSolFont;
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 18px;
+    letter-spacing: 0px;
+    text-align: left;
+    color: #ffffff;
+    margin-top: 22px;
+}
+
+.rate_box .mount_box .sub_btn{
+    width: 185px;
+    height: 46px;
+    border-radius: 40px;
+    background: linear-gradient(90deg, #FF7A52 0%, #FFD151 100%);
+    font-family: tetriSolFont;
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 18px;
+    letter-spacing: 0px;
+    text-align: center;
+    color: #ffffff;
+    cursor: pointer;
+    margin-top: 42px;
+}
+
+.rate_box .rate_table{
+    width: 1092px;
+    height: 446px;
+    background-image: url('/src/static/image/rate_bg.png');
+    background-size: 1092px 446px;
+    background-repeat: no-repeat;
+    margin-top: 100px;
+    padding: 54px 0 0 54px;
+    box-sizing: border-box;
+    color: #2B1366;
+}
+
+.rate_box .rate_table .table_title{
+    font-family: tetriSolFont;
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 18px;
+    letter-spacing: 0px;
+    color: #2B1366;
+}
+
+.rate_box .rate_table .tb_tr{
+    font-family: tetriSolFont;
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 18px;
+}
+
+.rate_box .rate_table .tb_tr:nth-child(2){
+    height: 64px;
+    margin-top: 48px;
+}
+
+.rate_box .rate_table .tb_tr:nth-child(3){
+    height: 98px;
+}
+
+.rate_box .rate_table .tb_tr:nth-child(4){
+    height: 104px;
+}
+
+.rate_box .rate_table .tb_td{
+    width: 112px;
+    text-align: center;
+}
+
+.rate_box .rate_table .tb_td div:nth-child(1){
+    line-height: 26px;
+}
+
+.rate_box .rate_table .tb_td .lit_tip{
+    font-family: tetriSolFont;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 18px;
+    margin-top: 8px;
+}
+
+.rate_box .rate_table .tb_td:nth-child(1){
+    width: 400px;
+    text-align: left;
+    font-size: 24px;
+}
+
+.token_box {
+    margin-top: 150px;
+}
+
+.token_box .box{ 
+    width: 560px;
+    height: 444px;
+    border-radius: 50px;
+    background-color: #fff;
+}
+
+.token_box .box:nth-child(1){
+    padding: 76px 0 0 65px;
+    box-sizing: border-box;
+    color: #271260;
+    font-family: tetriSolFont;
+    font-size: 30px;
+    font-weight: 400;
+    line-height: 18px;
+}
+
+.token_box .first_title{
+    margin-bottom: 61px;
+}
+
+.token_box .box:nth-child(1) .text{
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    margin-bottom: 35px;
+}
+
+.token_box .box:nth-child(1) .text img{
+    width: 30px;
+    height: 30px;
+    margin: 0 14px;
+}
+
+.token_box .box .claim_box{
+    width: 382px;
+    height: 145px;
+    background-image: url('/src/static/image/claim_bg.png');
+    background-size: 382px 145px;
+    background-repeat: no-repeat;
+    margin-top: 78px;
+    margin-bottom: 28px;
+    padding-top: 23px;
+    box-sizing: border-box;
+}
+
+.token_box .box .claim_box .claim{
+    color: #ffffff;
+    font-family: tetriSolFont;
+    font-size: 22px;
+    font-weight: 400;
+    line-height: 18px;
+    letter-spacing: 0px;
+    text-align: left;
+    margin-bottom: 37px;
+
+}
+
+.token_box .box .claim_box .claim div{
+    width: 78px;
+    text-align: center;
+}
+
+.token_box .box .claim_box .claim .f_text{
+    width: 300px;
+    text-align: left;
+    padding-left: 20px;
+    box-sizing: border-box;
+}
+
+.token_box .box .claim_box .claim img{
+    width: 30px;
+    height: 30px;
+    margin-right: 11px;
+}
+
+.token_box .box .btn{
+    width: 300px;
+    height: 60px;
+    border-radius: 14px;
+    font-family: tetriSolFont;
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 18px;
+    color: #ffffff;
+    background: linear-gradient(90deg, #FF7A52 0%, #FFD151 100%);
+    margin-bottom: 12px;
+    cursor: pointer;
+}
+
+.chart_box{
+    margin-top: 46px;
+    width: 1200px;
+    height: 442px;
+    border-radius: 50px;
+    background-color: #fff;
+    /* padding-top: 70px; */
+    box-sizing: border-box;
+}
+
+.chart_box .left_box{
+    width: 450px;
+    height: 345px;
+    margin-right: 128px;
+}
+
+
+.chart_box .right_box .text{
+    display: flex;
+    align-items: center;
+    margin-bottom: 18px;
+    font-family: tetriSolFont;
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 18px;
+    color: #271260;
+}
+
+.chart_box .right_box .text img{
+    width: 30px;
+    height: 30px;
+    margin: 0 14px;
+}
+
+.chart_box .right_box .color_box{
+    margin-left: 60px;
+    margin-bottom: 20px;
+    font-family: Poppins;
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 30px;
+    letter-spacing: 0px;
+    text-align: left;
+    color: #271260;
+}
+
+.chart_box .right_box .color_box div:nth-child(1){
+    width: 37px;
+    height: 18px;
+    border-radius: 10px;
+    margin-right: 20px;
+}
+
+.iframe_box{
+    border-radius: 30px;
+    margin-top: 150px;
+    border: none;
+}
+
+.contact_box{
+    width: 1200px;
+    height: 383px;
+    background-image: url('/src/static/image/contact_bg.png');
+    background-size: 1200px 383px;
+    background-repeat: no-repeat;
+    margin-top: 150px;
+    padding-top: 147px;
+    padding-left: 868px;
+    box-sizing: border-box;
+    margin-bottom: 200px;
+}
+
+.contact_box .target_btn{
+    width: 252px;
+    height: 72px;
+    border-radius: 54px;
+    background-color: #271260;
+    font-family: tetriSolFont;
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 28px;
+    color: #ffffff;
+    cursor: pointer;
+}
+
+.contact_box .target_btn:nth-child(2){
+    margin-top: 30px;
+}
+
+.contact_box .target_btn span{
+    width: 100px;
+}
+
+.contact_box .target_btn img{
+    width: 43px;
+    height: 43px;
+    border-radius: 50%;
+    margin-right: 10px;
+}

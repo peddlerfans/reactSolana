@@ -113,6 +113,7 @@ const BottomDialog = ({
         >
           <TextField
             fullWidth
+            type="number"
             placeholder={inputPlaceholder}
             value={inputValue}
             onChange={onInputChange}

@@ -9,23 +9,22 @@
   background-image: url('/src/static/image/indexBg.png');
   background-size: 100% 100%;
   background-repeat: no-repeat;
-  padding: 0 12px;
+  /* padding: 0 12px; */
 }
 
 /* 判断浏览器大小条件 */
 @media screen and (max-width:760px) {
   .App {
-    background: #1E0E54;
-    background-image: url('/src/static/image/indexBg.png');
+    background: #F7F7FA;
+    background-image: url('/src/static/image/pages/rankImg.png');
     background-size: 100% 100%;
-    background-repeat: no-repeat;
-    padding: 0 12px;
+    background-repeat: no-repeat; 
   }
 }
 
-.content {
+/* .content {
   width: 1200px;
-}
+} */
 
 .header {
   height: 115px;
@@ -54,7 +53,7 @@
 /* 判断浏览器大小条件 */
 @media screen and (max-width:760px) {
   .content {
-    width: 100%;
+    width: 96%;
   }
 
   .header {

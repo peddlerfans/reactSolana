@@ -3,16 +3,11 @@ import { AppBar, Toolbar, Typography, IconButton, Box } from "@mui/material";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack"; // ✅ v4 的导入方式
 import { useNavigate } from "react-router-dom"; // 用于页面跳转
 
-const RewardHeader = () => {
+const RewardHeader = ({ title = "标题" }) => {
   const navigate = useNavigate();
 
   return (
-    <AppBar
-      position="static"
-      color="transparent"
-      elevation={0}
-      sx={{ px: 2, py: 1 }}
-    >
+    <AppBar position="static" color="transparent" elevation={0} sx={{ py: 1 }}>
       <Toolbar sx={{ display: "flex", alignItems: "center" }}>
         {/* 返回按钮 */}
         <IconButton edge="start" onClick={() => navigate(-1)}>
@@ -24,7 +19,7 @@ const RewardHeader = () => {
           variant="h6"
           sx={{ flexGrow: 1, textAlign: "center", fontWeight: "bold" }}
         >
-          社区奖励
+          {title}
         </Typography>
 
         {/* 占位符（右侧空白保持标题居中） */}

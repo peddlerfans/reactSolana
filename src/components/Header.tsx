@@ -36,10 +36,10 @@ const Header: React.FC<{ showWallet?: boolean }> = ({ showWallet = true }) => {
 
     const menuItemsTop = [
         { text: "资产", icon: iconAsset, url: "/h5/asset" },
-        { text: "社区奖励", icon: iconReward },
+        { text: "社区奖励", icon: iconReward, url: "/h5/rank" },
         { text: "NFT 委员会", icon: iconNFT },
         { text: "排行榜", icon: iconRank },
-        { text: "我的社区", icon: iconCommunity },
+        { text: "我的社区", icon: iconCommunity, url: "/h5/community" },
     ];
 
     const menuItemsBottom = [

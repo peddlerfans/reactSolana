@@ -10,4 +10,11 @@
     font-weight: normal;
     font-style: normal;
 }
+
+@font-face {
+    font-family: 'YouSheBiaoTiHei';
+    src: url('./YouSheBiaoTiHeiRegular.ttf');
+    font-weight: normal;
+    font-style: normal;
+}
   

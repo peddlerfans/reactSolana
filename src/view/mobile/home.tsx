@@ -21,7 +21,7 @@ require("./home.css");
 
 const TodoList = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [passwordOpen, setPasswordOpen] = useState(true);
+  const [passwordOpen, setPasswordOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [password, setPassword] = useState("")
   const TETRIS_STATE_SEED = config.TETRIS_STATE_SEED;

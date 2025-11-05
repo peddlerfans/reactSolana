@@ -2,31 +2,30 @@ import {
   useAnchorWallet,
 } from "@solana/wallet-adapter-react";
 import { useTranslation } from 'react-i18next';
+import { TOKEN_PROGRAM_ID, getAssociatedTokenAddress } from '@solana/spl-token';
 import { Connection, PublicKey, SystemProgram, SYSVAR_RENT_PUBKEY } from "@solana/web3.js";
 import { Program, Provider } from "@project-serum/anchor";
 import idl from "../../idl.json";
+import { apiService } from "../../utils/apiService";
 import * as anchor from "@project-serum/anchor";
-import copy from 'copy-to-clipboard';
 
 import { useState, useEffect } from 'react';
 // import { publicKey } from "@project-serum/anchor/dist/cjs/utils";
-import { Link } from "react-router-dom";
 import axios from "axios";
 import config from "../../common/config.json"
-import BottomDialog from '../../components/BottomDialog';
 import PasswordDialog from '../../components/PasswordDialog';
 import { Box, Typography, Divider, Button, DialogActions } from '@mui/material';
 
 require("./home.css");
 
 const TodoList = () => {
-  const [dialogOpen, setDialogOpen] = useState(false);
   const [passwordOpen, setPasswordOpen] = useState(false);
-  const [inputValue, setInputValue] = useState('');
   const [password, setPassword] = useState("")
   const TETRIS_STATE_SEED = config.TETRIS_STATE_SEED;
   const TETRIS_VAULT_SEED = config.TETRIS_VAULT_SEED;
   const TETRIS_USER_STATE_SEED = config.TETRIS_USER_STATE_SEED;
+  const TRUMP_MINT = new PublicKey(config.TRUMP_MINT); //川普币Mint地址
+  const TRUMP_VAULT_SEED = config.TRUMP_VAULT_SEED // 川普币金库种子
   const network = config.network;
   const { t } = useTranslation();
   let wallet = useAnchorWallet();
@@ -34,21 +33,14 @@ const TodoList = () => {
   const PROGRAM_ID = new PublicKey(config.PROGRAM_ID);
   const TREASURY = new PublicKey(config.TREASURY);
 
-
-  const handleOpenDialog = () => {
-    setDialogOpen(true);
-  };
-
-  const handleCloseDialog = () => {
-    setDialogOpen(false);
-  };
-
-  const handleOpenPwdDialog = () => {
-    setPasswordOpen(true)
-  }
-
   // 点击密码确定
-  const handlePasswordConfirm = () => {
+  const handlePasswordConfirm = async () => {
+    try {
+      const res = await apiService.user.bindInvate({ invite_code: password })
+    } catch (error) {
+      console.log(error);
+
+    }
     console.log('输入的邀请码:', password);
     setPassword("")
     setPasswordOpen(false)
@@ -58,23 +50,21 @@ const TodoList = () => {
     setPasswordOpen(false)
   }
 
-  const handleConfirm = () => {
-    console.log('输入的内容:', inputValue);
-    // 这里处理确定按钮的逻辑
-    handleCloseDialog();
-  };
-
-  const handleCancel = () => {
-    // 这里处理取消按钮的逻辑
-    handleCloseDialog();
-  };
-
-  const handleInputChange = (event: any) => {
-    setInputValue(event.target.value);
-  };
-
   const handlePwdInputChange = (event: any) => {
     setPassword(event.target.value);
+  };
+
+
+  //定义全局program
+  const getProgram = () => {
+    const provider = getProvider();
+
+    if (!provider) return null;
+    // idl：合约的接口定义（就像API文档） 
+    const a = JSON.stringify(idl);
+    const b = JSON.parse(a);
+    // program：用来调用合约函数的工具 使用合约的接口定义创建与智能合约对话的"电话"
+    return new Program(b, idl.metadata.address, provider);
   };
 
   const getGlobalStateKey = async () => {
@@ -93,6 +83,7 @@ const TodoList = () => {
     return [pubKey, bump];
   };
 
+  //旧版获取tetris项目方地址函数
   const getVaultKey = async () => {
     const [vaultKey] = await asyncGetPda(
       [Buffer.from(TETRIS_VAULT_SEED)],
@@ -102,6 +93,16 @@ const TodoList = () => {
     return vaultKey;
   };
 
+  // 新版获取川普币项目方金库
+  const getTrumpVaultKey = async () => {
+    const [vaultKey] = await asyncGetPda(
+      [Buffer.from(TRUMP_VAULT_SEED)],
+      PROGRAM_ID
+    );
+    return vaultKey;
+  };
+
+  // 用种子 "user_state" + 用户钱包地址 通过PDA算法生成
   const getUserStateKey = async (userKey: PublicKey) => {
     const [userStateKey] = await asyncGetPda(
       [Buffer.from(TETRIS_USER_STATE_SEED), userKey.toBuffer()],
@@ -139,11 +140,6 @@ const TodoList = () => {
   let [rewards, setReward] = useState<any>('0.00')
 
   let [isStart, setStart] = useState<any>(false)
-  const [contributionType, setContributionType] = useState('wallet');
-
-  const handleTypeChange = (event: any) => {
-    setContributionType(event.target.value);
-  };
 
   // let referralUrl = 'https//www.tetriSol.net/home?referral=' + referral
   // https://tetrisol.net/home
@@ -156,31 +152,16 @@ const TodoList = () => {
 
   //获取钱包的信息 合约globalState
   const getData = async () => {
-    const provider = getProvider();
 
-    if (!provider) {
-      return;
-    }
-    // let vaultKey = await getVaultKey();
-    const a = JSON.stringify(idl);
-    const b = JSON.parse(a);
-
-    const connection = new Connection(network, "processed");
-
+    const program = getProgram()
     const currentTime = (new Date().getTime() / 1000).toFixed(0);
-
-    const program = new Program(b, idl.metadata.address, provider);
-    // if(wallet){
-    //   const balance3 = await connection.getBalance(wallet.publicKey);
-    //   console.log('wallet', balance3.toString());
-    // }
-
+    //合约的全局设置信息
     let globalStateKey = await getGlobalStateKey();
-    let globalData = await program.account.globalState.fetch(globalStateKey);
-    // console.log(`globalData :`, JSON.stringify(globalData))
+    let globalData = await program?.account.globalState.fetch(globalStateKey);
+    // console.log(`globalData :`, globalData)
 
     //判断可以购买的时间
-    if (globalData.startTime < currentTime) {
+    if (globalData?.startTime < currentTime) {
       setStart(true)
     } else {
       setStart(false)
@@ -196,69 +177,32 @@ const TodoList = () => {
     const response = await axios.get('https://api.dexscreener.com/latest/dex/tokens/So11111111111111111111111111111111111111112');
     // console.log(`price :`, response.data['pairs'][0].priceUsd)
     cachedPrice = response.data['pairs'][0].priceUsd;
+    // console.log("从DexScreener获取SOL的美元价格:",cachedPrice);
+    // console.log("wallet",wallet);
+
     // debugger
     if (wallet) {
 
-      setReferralUrl('https://www.tetrisol.net/home?referral=' + wallet.publicKey)
+      setReferralUrl('https://www.tetrisol.net/home?referral=' + wallet.publicKey) //更新推荐链接
       //teriSolMount
       userState = { teriSolMount: 0.00, referral: null }
       try {
+        // 如果有钱包连接，获取用户数据，类似专属档案柜编号
         let userStateKey = await getUserStateKey(wallet.publicKey);
-        userState = await program.account.userState.fetch(userStateKey);
-        // console.log(`userState :`, JSON.stringify(userState))
-
+        userState = await program?.account.userState.fetch(userStateKey);
+        console.log(`userState :`, userState)
 
         amount = Number(userState.settlement.toString()) / 1000000000
-        amount += Number(((Number(currentTime) - Number(userState.timestamp.toString())) * globalData.totalSol * userState.teriSolMount * globalData.perReward / globalData.totalTeriSol) / 1000000000000000000)
+        amount += Number(((Number(currentTime) - Number(userState.timestamp.toString())) * globalData?.totalSol * userState.teriSolMount * globalData?.perReward / globalData?.totalTeriSol) / 1000000000000000000)
 
         if (Number.isNaN(amount)) {
           amount = 0.00
         }
-
-        // console.log('settlement', Number(userState.settlement.toString()))
-
-        // console.log('amount', amount.toFixed(9))
-        // console.log('amount差值', Number(((Number(currentTime) - Number(userState.timestamp.toString())) * globalData.totalSol * userState.teriSolMount * globalData.perReward / globalData.totalTeriSol)/1000000000000000000))
-        // console.log('time差值', Number(currentTime) - userState.timestamp.toString())
-
-        setReward(amount.toFixed(9))
-
-        getReferral(userState.referral.toString())
-
-        // console.log('referral', !referral)
-        // console.log('referral', document.location.search)
+        setReward(amount.toFixed(9)) // 更新收益显示
+        getReferral(userState.referral.toString())  // 更新推荐人
       } catch (error) {
-        // console.log(`userState error :`, error)
+        console.log(`userState error :`, error)
       }
-
-      //TVL
-      // const balance2 = await connection.getBalance(vaultKey);
-      // console.log('TVL', (globalData.totalSol*cachedPrice/1000000000).toFixed(2));
-      //wallet
-      // const balance3 = await connection.getBalance(wallet.publicKey);
-      // console.log('wallet', balance3.toString());
-
-      // console.log(`settlement :`, userState.settlement)
-      // console.log(`当前时间 :`, currentTime)
-      // console.log(`用户的时间 :`, userState.timestamp.toString())
-      // console.log(`total_sol :`, globalData.totalSol)
-      // console.log(`teri_sol_mount :`, userState.teriSolMount)
-      // console.log(`per_reward :`, globalData.perReward)
-      // console.log(`total_teri_sol :`, globalData.totalTeriSol.toString())
-      // console.log('time差值', Number(currentTime) - userState.timestamp.toString())
-
-
-      // let userStateKey = await getUserStateKey(wallet.publicKey);
-      // let userState = await program.account.userState.fetch(userStateKey);
-      // console.log(`userState :`, userState)
-
-      // getReferral(userState.referral.toString())
-      // console.log(`getReferr :`, userState.referral.toString())
-
-      //Rewards
-      // let mut amount = ctx.accounts.user_state.settlement;
-      // amount += (Clock::get()?.unix_timestamp - ctx.accounts.user_state.timestamp) as u64 * ctx.accounts.global_state.total_sol * ctx.accounts.user_state.teri_sol_mount * ctx.accounts.global_state.per_reward as u64 / ctx.accounts.global_state.total_teri_sol /DECIMAL;
-      //（time(当前时间 单位/秒) - user_state.timestamp) * global_state.total_sol * user_state.teri_sol_mount * global_state.per_reward / global_state.total_teri_sol /九位精度
     }
 
   }
@@ -276,29 +220,30 @@ const TodoList = () => {
     const b = JSON.parse(a);
     const program = new Program(b, idl.metadata.address, provider);
 
+    //合约的金库地址，所有用户质押都存放在这里
     let vaultKey = await getVaultKey();
     if (wallet) {
-      //获取到的用户的钱包地址
+      //获取到的用户的钱包地址，类似邮箱地址
       let key1 = wallet.publicKey
       const tx = await program.transaction.hatchTetris(
         //BN->获取到的下单的金额
         {
           accounts: {
-            user: wallet.publicKey,
-            globalState: await getGlobalStateKey(),
-            vault: vaultKey,
-            userState: await getUserStateKey(wallet.publicKey),
-            rent: SYSVAR_RENT_PUBKEY,
-            systemProgram: SystemProgram.programId,
+            user: wallet.publicKey, // 告诉合约：谁在操作
+            globalState: await getGlobalStateKey(), // 全局状态
+            vault: vaultKey, // 资金池
+            userState: await getUserStateKey(wallet.publicKey), // 用户数据
+            rent: SYSVAR_RENT_PUBKEY, //Solana存储租金系统
+            systemProgram: SystemProgram.programId, // Solana系统程序
           },
         });
-      tx.feePayer = key1
+      tx.feePayer = key1 // 设置付费者（用户自己付Gas费）
 
       const connection = new Connection(network, "processed");
-      tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash
-      const signedTx = await wallet.signTransaction(tx)
-      const txId = await connection.sendRawTransaction(signedTx.serialize())
-      await connection.confirmTransaction(txId)
+      tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash // 获取最新的区块哈希（交易有效期）
+      const signedTx = await wallet.signTransaction(tx) // 用户用钱包签名（授权交易）
+      const txId = await connection.sendRawTransaction(signedTx.serialize()) // 发送交易到区块链
+      await connection.confirmTransaction(txId) // 等待交易确认
 
       //完成交易再次获取信息
       getData()
@@ -309,8 +254,6 @@ const TodoList = () => {
   const onSellTetris = async () => {
     const provider = getProvider();
     // console.log('提现',provider)
-
-
     if (!provider) {
       return;
     }
@@ -365,8 +308,8 @@ const TodoList = () => {
     const b = JSON.parse(a);
     const program = new Program(b, idl.metadata.address, provider);
 
+    //合约的金库地址，所有用户质押的代币都存放在这里
     let vaultKey = await getVaultKey();
-    // console.log('邀请人的钱包地址', referral)
     let referralKey: any;
     // //邀请人的钱包地址
     // if(referral){
@@ -429,20 +372,30 @@ const TodoList = () => {
       // console.log('加精度之后的值', tetriSolNum*1000000000)
       // console.log('推荐人地址', referral)
       // console.log('推荐人地址key', referralKey.toBase58())
+      // 获取相关ATA地址 每个代币Mint + 钱包地址 = 唯一的ATA
+      /**
+       * 一个钱包可以持有多种代币（SOL、USDC、川普币等）
 
+每种代币都需要单独的"保险箱"来存储
+
+ATA就是这个保险箱的地址
+       */
+      const userTrumpATA = await getAssociatedTokenAddress(TRUMP_MINT, wallet.publicKey);
+      const trumpVaultKey = await getTrumpVaultKey(); //所有用户质押的川普币都存放在这里
+      // console.log('邀请人的钱包地址', referral)
       //获取到的用户的钱包地址
       const tx = await program.transaction.buyTetris(
-        //BN->获取到的下单的金额
+        //BN->获取到的下单的金额 将用户输入的SOL数量转换为链上精度
         new anchor.BN(tetriSolNum * 1000000000), {
         accounts: {
           user: key1, //获取到的用户的钱包地址
           globalState: await getGlobalStateKey(),
-          treasury: TREASURY,
-          vault: vaultKey,
-          userState: await getUserStateKey(key1),
+          treasury: TREASURY, //// 国库地址（收手续费）
+          vault: vaultKey, // 资金池
+          userState: await getUserStateKey(key1),  // 购买者数据
           systemProgram: SystemProgram.programId,
           referral: referralKey, //邀请人的钱包地址
-          referralState: await getUserStateKey(referralKey),
+          referralState: await getUserStateKey(referralKey),  // 邀请人数据
           rent: SYSVAR_RENT_PUBKEY,
         },
       });
@@ -461,37 +414,6 @@ const TodoList = () => {
     }
   }
 
-  const handleClick = () => {
-    copy(referralUrl);
-    // console.log(referralUrl)
-    alert('Copied Successfully')
-  }
-
-  const targetX = () => {
-    // console.log('targetX')
-    window.open('https://twitter.com/TetrisSol')
-  }
-
-  const targetTg = () => {
-    // console.log('targetTg')
-    window.open('https://t.me/TetrisSol ')
-  }
-
-  const openPopOne = () => {
-    alert('You do not have enough blocks to MINT TetrisBlOCK')
-  }
-
-  const openPopTwo = () => {
-    alert('Not available at the moment')
-  }
-
-  const onTipTime = () => {
-    alert(`TetriSol's launch is set for February 3rd at 1700 UTC, and you will have the opportunity to make a purchase after the launch.`)
-  }
-
-  // getData()
-
-  // const [count,setCount] = useState(0);
   /**useEffect替代生命周期函数componentDidMount和componentDidUpdate */
   useEffect(() => {
     getData()
@@ -501,72 +423,18 @@ const TodoList = () => {
     // console.log("componentDidMount");
   }, [wallet])
 
-
-  const [choiceTetris, changeTetris] = useState<any>(0)
-
-  const onChangeTetris = (e: any) => {
-    changeTetris(e)
-    // console.log(e);
-  }
-
   return (
     <div className="content">
-      <div className="doc_btn flex just_align_center" onClick={getData}>
-        {/* Document */}
-        <Link className="list-group-item" to="/h5/document">TetriSol Paper</Link>
-      </div>
-
-      <div className="main_box">
-        <div className="inp_box flex">
-          <input type="number" placeholder="0 SOL" onChange={handleChange} onWheel={event => (event.target as HTMLInputElement).blur()} value={tetriSolNum} />
-        </div>
-        {
-          isStart ?
-            <div className="buy_btn flex just_align_center" onClick={onBuyTetris}>
-              Purchase TetriSol
-            </div>
-            :
-            <div className="buy_btn flex just_align_center not_open" onClick={onTipTime}>
-              Purchase TetriSol
-            </div>
-        }
-
-        {
-          isStart ?
-            <div className="re_buy_box flex_column align_center">
-
-              <div className="flex just_align_center" onClick={onHatchTetris}>
-                COMPOUND
-              </div>
-
-              <div className="flex just_align_center" onClick={onSellTetris}>
-                CLAIM REWARDS
-              </div>
-            </div>
-            :
-            <div className="re_buy_box flex_column align_center">
-
-              <div className="flex just_align_center not_open" onClick={onTipTime}>
-                COMPOUND
-              </div>
-
-              <div className="flex just_align_center not_open" onClick={handleOpenDialog}>
-                CLAIM REWARDS
-              </div>
-            </div>
-        }
-      </div>
-
-
       {/* 标题和标语 */}
       <Box sx={{ textAlign: 'center', mb: 3, marginTop: "400px", padding: "0 28px" }}>
         <Typography
+          onClick={getData}
           variant="h3"
           component="h1"
           sx={{
             fontWeight: 'bold',
             color: '#FFF',
-            mb: 2,
+            mb: "20px",
             fontSize: "32px"
           }}
         >
@@ -578,12 +446,11 @@ const TodoList = () => {
           variant="h6"
           sx={{
             lineHeight: 1.6,
-            mb: 2,
+            mb: "40px",
             fontSize: "14px",
           }}
         >
-          We Fight for Freedom. We Fight for Innovation.<br />
-          We Fight Together.
+          {t("welcome")}
         </Typography>
 
         {/* 分割线 */}
@@ -592,7 +459,6 @@ const TodoList = () => {
 
       {/* 选择贡献数量标题 */}
       <Button
-        onClick={handleOpenDialog}
         variant="outlined"
         fullWidth
         sx={{
@@ -604,13 +470,13 @@ const TodoList = () => {
           height: "50px"
         }}
       >
-        选择贡献数量
+        {t("chooseNum")}
       </Button>
 
       {/* 贡献方式选择 */}
       <DialogActions sx={{ p: 2, gap: 1, padding: "24px 0 0 0 " }}>
         <Button
-          onClick={handleOpenDialog}
+          onClick={onBuyTetris}
           variant="outlined"
           fullWidth
           sx={{
@@ -622,10 +488,10 @@ const TodoList = () => {
             height: "50px"
           }}
         >
-          钱包转入
+          {t("walletTransIn")}
         </Button>
         <Button
-          onClick={handleOpenPwdDialog}
+          onClick={onHatchTetris}
           variant="contained"
           fullWidth
           sx={{
@@ -637,31 +503,18 @@ const TodoList = () => {
             height: "50px"
           }}
         >
-          余额复投
+          {t("hatch")}
         </Button>
       </DialogActions>
 
-      <BottomDialog
-        open={dialogOpen}
-        onClose={handleCloseDialog}
-        title="贡献数量选择"
-        inputValue={inputValue}
-        onInputChange={handleInputChange}
-        onConfirm={handleConfirm}
-        onCancel={handleCancel}
-        confirmText="确定"
-        cancelText="取消"
-        inputLabel="请输入10的倍数"
-        inputPlaceholder="请输入一些内容..."
-      />
       <PasswordDialog
         password={password}
         open={passwordOpen}
         onClose={handleClosePasswordDialog}
         onConfirm={handlePasswordConfirm}
-        title="绑定推荐人"
-        buttonText="确定"
-        inputPlaceholder="请输入邀请码"
+        title={t("bindInviter")}
+        buttonText={t("confirm")}
+        inputPlaceholder={t("inputInviteCode")}
         onInputChange={handlePwdInputChange}
       />
     </div>

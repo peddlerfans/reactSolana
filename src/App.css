@@ -15,10 +15,11 @@
 /* 判断浏览器大小条件 */
 @media screen and (max-width:760px) {
   .App {
-    background: #F7F7FA;
+    /* background: #F7F7FA; */
     background-image: url('/src/static/image/pages/rankImg.png');
     background-size: 100% 100%;
-    background-repeat: no-repeat; 
+    background-repeat: no-repeat;
+    position: relative;
   }
 }
 

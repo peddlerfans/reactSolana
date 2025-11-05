@@ -16,10 +16,15 @@ i18n
   .use(initReactI18next) // 让 react-i18next 生效
   .init({
     resources,
-    fallbackLng: "en", // 默认语言
+    fallbackLng: "zh", // 默认语言
     debug: false,
     interpolation: {
       escapeValue: false, // React 已经有 XSS 保护
+    },
+    detection: {
+      // 优先级顺序：localStorage > navigator > html标签
+      order: ["localStorage", "navigator", "htmlTag"],
+      caches: ["localStorage"], // 缓存语言设置
     },
   });
 

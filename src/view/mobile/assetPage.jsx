@@ -4,20 +4,51 @@ import BottomDialog from "../../components/BottomDialog";
 import {
   Box,
   Typography,
-  Button,
+  List,
   Tabs,
   Tab,
   Paper,
-  Divider,
+  ListItem,
+  Button
 } from "@mui/material";
+import { useTranslation } from "react-i18next";
 import assetHeader from "../../static/image/pages/assetHeader.png";
+import { useUserInfo } from '../../hooks/useUserInfo';
+import GlobalSnackbar from "../../components/GlobalSnackbar";
 const RewardPage = () => {
+  const { t } = useTranslation();
   const [tab, setTab] = useState(0);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [toast, setToast] = useState({ open: false, message: '', type: 'success' });
+  const pageSize = 10;
+  // 根据tab决定使用哪个type
+  const getTypeByTab = (tabIndex) => {
+    switch (tabIndex) {
+      case 0: return "in";
+      case 1: return "out";
+      default: return null;
+    }
+  };
+
+  const type = getTypeByTab(tab);
   const handleTabChange = (event, newValue) => {
     setTab(newValue);
+    setCurrentPage(1); // 切换tab时重置页码
   };
+
+  const {
+    userInfo,
+    records,
+    loading,
+    error,
+    pagination,
+    refetch,
+    refetchRecords,
+    loadMore,
+    changePage
+  } = useUserInfo(type, currentPage, pageSize);
 
   const handleOpenDialog = () => {
     setDialogOpen(true);
@@ -25,6 +56,7 @@ const RewardPage = () => {
 
   const handleCloseDialog = () => {
     setDialogOpen(false);
+    setToast({ open: true, message: '质押成功！', type: 'success' });
   };
   const handleConfirm = () => {
     console.log("输入的内容:", inputValue);
@@ -41,46 +73,90 @@ const RewardPage = () => {
     setInputValue(event.target.value);
   };
 
-  // 假数据
-  const staticEarningsData = {
-    total: "18514川普币",
-    dividends: [
-      { id: 1, amount: "0.12345678" },
-      { id: 2, amount: "0.12345678" },
-      { id: 3, amount: "0.12345678" },
-      { id: 4, amount: "0.12345678" },
-      { id: 5, amount: "0.12345678" },
-      { id: 6, amount: "0.12345678" },
-    ],
-  };
+  // 处理加载状态
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          bgcolor: "#F1EFF9",
+          minHeight: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Typography>加载中...</Typography>
+      </Box>
+    );
+  }
+
+  // 处理错误状态
+  if (error) {
+    return (
+      <Box
+        sx={{
+          bgcolor: "#F1EFF9",
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          p: 3,
+        }}
+      >
+        <Typography color="error" sx={{ mb: 2 }}>
+          加载失败: {error}
+        </Typography>
+        <Button
+          onClick={refetchRecords}
+          variant="contained"
+          sx={{
+            bgcolor: "#A069F6",
+            color: "white",
+          }}
+        >
+          重新加载
+        </Button>
+      </Box>
+    );
+  }
+
+  // 处理加载状态
+  if (loading && tab === 0 && !userInfo) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "200px" }}>
+        <Typography>加载中...</Typography>
+      </Box>
+    );
+  }
 
   const contributionData = [
     {
       id: 1,
       type: "质押",
-      amount: "+获得120贡献值",
-      coins: "666川普币",
+      amount: "120",
+      coins: "666",
       date: "2025/11/11",
     },
     {
       id: 2,
       type: "质押",
-      amount: "+获得120贡献值",
-      coins: "666川普币",
+      amount: "120",
+      coins: "666",
       date: "2025/11/11",
     },
     {
       id: 3,
       type: "质押",
-      amount: "+获得120贡献值",
-      coins: "666川普币",
+      amount: "120",
+      coins: "666",
       date: "2025/11/11",
     },
     {
       id: 4,
       type: "质押",
-      amount: "+获得120贡献值",
-      coins: "666川普币",
+      amount: "120",
+      coins: "666",
       date: "2025/11/11",
     },
   ];
@@ -89,33 +165,33 @@ const RewardPage = () => {
     {
       id: 1,
       type: "提现",
-      amount: "-100川普币",
-      fee: "1%手续费",
-      received: "+到账120川普币",
+      amount: "-100",
+      fee: "1%",
+      received: "120",
       date: "2025/11/11",
     },
     {
       id: 2,
       type: "提现",
-      amount: "-100川普币",
-      fee: "1%手续费",
-      received: "+到账120川普币",
+      amount: "-100",
+      fee: "1%",
+      received: "120",
       date: "2025/11/11",
     },
     {
       id: 3,
       type: "提现",
-      amount: "-100川普币",
-      fee: "1%手续费",
-      received: "+到账120川普币",
+      amount: "-100",
+      fee: "1%",
+      received: "120",
       date: "2025/11/11",
     },
     {
       id: 4,
       type: "提现",
-      amount: "-100川普币",
-      fee: "1%手续费",
-      received: "+到账120川普币",
+      amount: "-100",
+      fee: "1%",
+      received: "120",
       date: "2025/11/11",
     },
   ];
@@ -133,7 +209,7 @@ const RewardPage = () => {
         position: "relative",
       }}
     >
-      <RewardHeader title="我的资产"/>
+      <RewardHeader title={t("assets.text1")} />
       <img
         src={require("../../static/image/pages/assetBgi.png")}
         alt="dao"
@@ -171,40 +247,10 @@ const RewardPage = () => {
           }}
         >
           <Typography variant="body1" sx={{ fontSize: "14px", color: "#888" }}>
-            总贡献值
-          </Typography>
-          <Typography variant="body1" sx={{ fontSize: "14px", color: "#333" }}>
-            16165.415
-          </Typography>
-        </Box>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            mb: "20px",
-          }}
-        >
-          <Typography variant="body1" sx={{ fontSize: "14px", color: "#888" }}>
-            可提现数额
-          </Typography>
-          <Typography variant="body1" sx={{ fontSize: "14px", color: "#333" }}>
-            18514川普币
-          </Typography>
-        </Box>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            mb: "20px",
-          }}
-        >
-          <Typography variant="body1" sx={{ fontSize: "14px", color: "#888" }}>
             贡献总数
           </Typography>
           <Typography variant="body1" sx={{ fontSize: "14px", color: "#333" }}>
-            18514川普币
+            {userInfo.total_pledge_balance}
           </Typography>
         </Box>
         <Box
@@ -216,15 +262,55 @@ const RewardPage = () => {
           }}
         >
           <Typography variant="body1" sx={{ fontSize: "14px", color: "#888" }}>
-            {" "}
-            剩余奖励额度
+            个人贡献值
           </Typography>
           <Typography variant="body1" sx={{ fontSize: "14px", color: "#333" }}>
-            632.21川普币/已烧伤
+            {userInfo.person_contribution_value}
+          </Typography>
+        </Box>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: "20px",
+          }}
+        >
+          <Typography variant="body1" sx={{ fontSize: "14px", color: "#888" }}>
+            {t("assets.text3")}
+          </Typography>
+          <Typography variant="body1" sx={{ fontSize: "14px", color: "#333" }}>
+            {userInfo.balance}川普币
+          </Typography>
+        </Box>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: "20px",
+          }}
+        >
+          <Typography variant="body1" sx={{ fontSize: "14px", color: "#888" }}>
+            {t("assets.text5")}
+          </Typography>
+          <Typography variant="body1" sx={{ fontSize: "14px", color: "#333" }}>
+            {userInfo.left_reward + '川普币'}
+            <Typography
+              component="span"
+              sx={{
+                fontSize: "14px",
+                color: userInfo?.burn_flag ? "#ff4d4f" : "#95BE25",
+                fontWeight: "bold",
+                ml: 0.5
+              }}
+            >
+              {userInfo?.burn_flag ? '/已烧伤' : '/未烧伤'}
+            </Typography>
           </Typography>
         </Box>
 
-        <Button
+        {/* <Button
           onClick={handleOpenDialog}
           variant="contained"
           sx={{
@@ -237,8 +323,8 @@ const RewardPage = () => {
             boxShadow: "none",
           }}
         >
-          转出
-        </Button>
+          {t("assets.text7")}
+        </Button> */}
       </Box>
 
       <Box
@@ -266,7 +352,7 @@ const RewardPage = () => {
           }}
         >
           <Tab
-            label="静态收益"
+            label={t("assets.text8")}
             sx={{
               borderRadius: "20px",
               minHeight: "32px",
@@ -280,21 +366,7 @@ const RewardPage = () => {
             }}
           />
           <Tab
-            label="贡献记录"
-            sx={{
-              borderRadius: "20px",
-              minHeight: "32px",
-              "&.Mui-selected": {
-                backgroundColor: "#A069F6",
-                color: "white",
-              },
-              "&:not(.Mui-selected)": {
-                color: "#000",
-              },
-            }}
-          />
-          <Tab
-            label="转出记录"
+            label={t("assets.text10")}
             sx={{
               borderRadius: "20px",
               minHeight: "32px",
@@ -315,63 +387,123 @@ const RewardPage = () => {
           {/* 静态收益 Tab */}
           {tab === 0 && (
             <Paper sx={{ borderRadius: 2, boxShadow: "none" }}>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  mb: 2,
-                }}
-              >
-                <Typography
-                  variant="body1"
-                  // eslint-disable-next-line no-dupe-keys
-                  sx={{ fontSize: "14px", color: "#333", fontSize: "15px" }}
-                >
-                  静态收益：
-                </Typography>
-                <Typography
-                  variant="body1"
-                  sx={{
-                    fontSize: "16px",
-                    color: "#95BE25",
-                    fontWeight: "bold",
-                    fontSize: "15px",
-                  }}
-                >
-                  {staticEarningsData.total}
-                </Typography>
-              </Box>
-
-              {/* <Divider sx={{ mb: 2 }} /> */}
-
-              {staticEarningsData.dividends.map((item, index) => (
-                <Box
-                  key={item.id}
-                  sx={{
+              {/* 表头 */}
+              <List sx={{ py: 0 }}>
+                <ListItem sx={{
+                  py: 1
+                }}>
+                  <Box sx={{
                     display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    mb:
-                      index === staticEarningsData.dividends.length - 1
-                        ? 0
-                        : "20px",
-                  }}
-                >
-                  <Typography
-                    variant="body1"
-                    sx={{ fontSize: "14px", color: "#888" }}
+                    width: "100%",
+                    justifyContent: "space-between"
+                  }}>
+                    <Typography variant="body2" sx={{
+                      fontWeight: "bold",
+                      color: "#333",
+                      width: "25%",
+                      textAlign: "center"
+                    }}>
+                      交易流水号
+                    </Typography>
+                    <Typography variant="body2" sx={{
+                      fontWeight: "bold",
+                      color: "#333",
+                      width: "25%",
+                      textAlign: "center"
+                    }}>
+                      数量
+                    </Typography>
+                    <Typography variant="body2" sx={{
+                      fontWeight: "bold",
+                      color: "#333",
+                      width: "25%",
+                      textAlign: "center"
+                    }}>
+                      系数
+                    </Typography>
+                    <Typography variant="body2" sx={{
+                      fontWeight: "bold",
+                      color: "#333",
+                      width: "25%",
+                      textAlign: "center"
+                    }}>
+                      日期
+                    </Typography>
+                  </Box>
+                </ListItem>
+
+                {/* 数据列表 */}
+                {records.map((item, index) => (
+                  <ListItem
+                    key={item.id}
+                    sx={{
+                      borderBottom: index === records.length - 1
+                        ? "none"
+                        : "1px solid #f0f0f0",
+                      py: 2,
+                    }}
                   >
-                    静态分红：
-                  </Typography>
-                  <Typography
-                    variant="body1"
-                    sx={{ fontSize: "14px", color: "#444", fontWeight: "bold" }}
-                  >
-                    {item.amount}
-                  </Typography>
-                </Box>
-              ))}
+                    <Box sx={{
+                      display: "flex",
+                      width: "100%",
+                      justifyContent: "space-between",
+                      alignItems: "center"
+                    }}>
+                      {/* 交易流水号 */}
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          width: "25%",
+                          textAlign: "center",
+                          color: "#666",
+                          display: "inline-block",
+                          whiteSpace: "pre-line",
+                          wordBreak: "break-word"
+                        }}
+                      >
+                        {item.transaction_no || "川普币"} {/* 根据你的数据结构调整 */}
+                      </Typography>
+
+                      {/* 数量 */}
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          width: "25%",
+                          textAlign: "center",
+                          color: "#444",
+                          fontWeight: "bold"
+                        }}
+                      >
+                        {item.amount}
+                      </Typography>
+
+                      {/* 系数 */}
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          width: "25%",
+                          textAlign: "center",
+                          color: "#666"
+                        }}
+                      >
+                        {item.coefficient || "1.0"} {/* 根据你的数据结构调整 */}
+                      </Typography>
+
+                      {/* 日期 */}
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          width: "25%",
+                          textAlign: "center",
+                          color: "#666"
+                        }}
+                      >
+                        {item.create_time || "2024-01-01"} {/* 根据你的数据结构调整 */}
+                      </Typography>
+                    </Box>
+                  </ListItem>
+                ))}
+              </List>
             </Paper>
           )}
 
@@ -385,7 +517,7 @@ const RewardPage = () => {
                     boxShadow: "none",
                     borderRadius: 2,
                     mb:
-                      index === staticEarningsData.dividends.length - 1
+                      index === records.length - 1
                         ? 0
                         : "22px",
                   }}
@@ -422,13 +554,13 @@ const RewardPage = () => {
                             color: "#333",
                           }}
                         >
-                          {item.type}
+                          {t("assets.text12")}
                         </Typography>
                         <Typography
                           variant="body2"
                           sx={{ color: "#444", fontSize: "14px" }}
                         >
-                          {item.coins}
+                          {item.coins + t("trump")}
                         </Typography>
                       </Box>
                     </Box>
@@ -442,7 +574,7 @@ const RewardPage = () => {
                           fontSize: "14px",
                         }}
                       >
-                        {item.amount}
+                        {t("assets.text13", { value: item.amount })}
                       </Typography>
                       <Typography
                         variant="body2"
@@ -450,91 +582,6 @@ const RewardPage = () => {
                           color: "#999",
                           textAlign: "end",
                           fontSize: "14px",
-                        }}
-                      >
-                        {item.date}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Paper>
-              ))}
-            </Box>
-          )}
-
-          {/* 转出记录 Tab */}
-          {tab === 2 && (
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              {withdrawalData.map((item, index) => (
-                <Paper
-                  key={item.id}
-                  sx={{
-                    borderRadius: 2,
-                    boxShadow:"none",
-                    mb:
-                      index === staticEarningsData.dividends.length - 1
-                        ? 0
-                        : "22px",
-                  }}
-                >
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                      }}
-                    >
-                      <img
-                        src={require("../../static/image/pages/transferOut.png")}
-                        alt=""
-                        width={26}
-                        height={26}
-                        style={{
-                          marginRight: "10px",
-                        }}
-                      />
-                      <Box>
-                        <Typography
-                          variant="body1"
-                          sx={{
-                            fontWeight: "bold",
-                            color: "#333",
-                            mb: "6px",
-                            fontSize: "14px",
-                          }}
-                        >
-                          {item.amount}
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          sx={{ color: "#999", fontSize: "14px" }}
-                        >
-                          {item.fee}
-                        </Typography>
-                      </Box>
-                    </Box>
-                    <Box>
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          color: "#95BE25",
-                          fontWeight: "500",
-                          textAlign: "end",
-                        }}
-                      >
-                        {item.received}
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          color: "#999",
-                          fontWeight: "400",
-                          textAlign: "end",
                         }}
                       >
                         {item.date}
@@ -559,6 +606,12 @@ const RewardPage = () => {
         cancelText="取消"
         inputLabel="请输入转出数量"
         inputPlaceholder="请输入一些内容..."
+      />
+      <GlobalSnackbar
+        open={toast.open}
+        onClose={() => setToast({ ...toast, open: false })}
+        message={toast.message}
+        severity={toast.type}
       />
     </Box>
   );

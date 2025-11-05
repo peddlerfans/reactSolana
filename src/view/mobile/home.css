@@ -1,9 +1,6 @@
 .content {
-    min-height: 100vh;
-    background: linear-gradient(180deg, rgba(4, 4, 4, 0.00) 0%, #040404 37.69%);
-    background-image: url('/src/static/image/indexBg.png');
-    background-size: 100% 100%;
-    background-repeat: no-repeat;
+    position: absolute;
+    bottom: 30px;
     padding: 0 12px;
 }
 

@@ -75,7 +75,7 @@ const BottomDialog = ({
               position: "absolute",
               left: 0,
               bottom: "0", // 标题文字与线条的间距，可根据视觉微调
-              "z-index": "-1",
+              zIndex: "-1",
               width: "100%",
               height: "9px",
               borderRadius: "4.5px",

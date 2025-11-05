@@ -16,7 +16,7 @@ import {
 import MenuIcon from '@material-ui/icons/Menu';
 import CloseIcon from '@material-ui/icons/Close';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-
+import { useTranslation } from 'react-i18next';
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import bgi from '../static/image/menu/bgi.png'; // ✅ 背景图
 import iconAsset from '../static/image/menu/asset.png';
@@ -26,24 +26,27 @@ import iconRank from '../static/image/menu/rank.png';
 import iconCommunity from '../static/image/menu/community.png';
 import iconLanguage from '../static/image/menu/lang.png';
 import iconAddress from '../static/image/menu/address.png';
+import iconStatic from '../static/image/menu/static.png';
 
 const Header: React.FC<{ showWallet?: boolean }> = ({ showWallet = true }) => {
     const [open, setOpen] = React.useState(false);
     const toggleDrawer = (newOpen: boolean) => () => setOpen(newOpen);
     const navigate = useNavigate();
+    const { t } = useTranslation();
     // 示例地址
     const address = "0xa8u921...5cs4";
 
     const menuItemsTop = [
-        { text: "资产", icon: iconAsset, url: "/h5/asset" },
-        { text: "社区奖励", icon: iconReward, url: "/h5/rank" },
-        { text: "NFT 委员会", icon: iconNFT },
-        { text: "排行榜", icon: iconRank },
-        { text: "我的社区", icon: iconCommunity, url: "/h5/community" },
+        { text: t("drawer.text2"), icon: iconAsset, url: "/h5/asset" },
+        { text: t("drawer.text3"), icon: iconReward, url: "/h5/reward" },
+        { text: t("drawer.text4"), icon: iconNFT, url: "/h5/nftPage" },
+        { text: t("drawer.text5"), icon: iconRank, url: "/h5/rank" },
+        { text: t("drawer.text6"), icon: iconCommunity, url: "/h5/community" },
+        { text: t("drawer.text9"), icon: iconStatic, url: "/h5/staticIncome" },
     ];
 
     const menuItemsBottom = [
-        { text: "切换语言", icon: iconLanguage },
+        { text: t("drawer.text7"), icon: iconLanguage, url: "/h5/language" },
         { text: "切换地址", icon: iconAddress },
     ];
 
@@ -83,7 +86,7 @@ const Header: React.FC<{ showWallet?: boolean }> = ({ showWallet = true }) => {
                 </IconButton>
 
                 <Typography sx={{ fontSize: 14, color: "#666", mb: 0.5 }}>
-                    我的账户
+                    {t("drawer.text1")}
                 </Typography>
                 <Typography
                     sx={{
@@ -119,7 +122,7 @@ const Header: React.FC<{ showWallet?: boolean }> = ({ showWallet = true }) => {
             {/* 下半部分菜单 */}
             <List>
                 {menuItemsBottom.map((item, index) => (
-                    <ListItemButton key={index}>
+                    <ListItemButton key={index} onClick={() => navigatePage(item)}>
                         <ListItemIcon sx={{ minWidth: 40 }}>
                             <img src={item.icon} alt="" width={22} height={22} />
                         </ListItemIcon>
@@ -130,11 +133,11 @@ const Header: React.FC<{ showWallet?: boolean }> = ({ showWallet = true }) => {
             </List>
 
             {/* 底部退出登录 */}
-            <Box sx={{ p: 2, textAlign: "center" }}>
+            {/* <Box sx={{ p: 2, textAlign: "center" }}>
                 <Typography sx={{ color: "#E84142", fontSize: 15, fontWeight: 500 }}>
                     退出登录
                 </Typography>
-            </Box>
+            </Box> */}
         </Box>
     );
 

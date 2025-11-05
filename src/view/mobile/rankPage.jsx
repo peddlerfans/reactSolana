@@ -1,5 +1,5 @@
 // RewardRankingPage.jsx
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   AppBar,
   Toolbar,
@@ -9,14 +9,17 @@ import {
   Paper,
   List,
   ListItem,
-} from "@material-ui/core";
+  Button
+} from "@mui/material";
+import { useTranslation } from "react-i18next";
 import { makeStyles } from "@material-ui/core/styles";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import AssignmentIcon from "@material-ui/icons/Assignment";
-import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import clsx from "clsx";
 import { useNavigate } from "react-router-dom"; // react-router v6
 import RankingTabs from "../../components/PillTab";
+import { useRankList } from "../../hooks/useRankList";
+import { DataLoader } from "../../components/DataLoader";
 // 本地图片导入（替换为你的真实路径）
 import rankImg from "../../static/image/pages/rankImg.png"; // 顶部背景（示例）
 import daoIcon from "../../static/image/pages/dao_avatar.png"; // 中间 DAO 圆形图
@@ -35,11 +38,6 @@ const useStyles = makeStyles((theme) => ({
     backgroundRepeat: "no-repeat",
   },
 
-  // AppBar
-  appBar: {
-    background: "transparent",
-    boxShadow: "none",
-  },
   toolbar: {
     paddingLeft: 8,
     paddingRight: 8,
@@ -55,7 +53,7 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     alignItems: "flex-start",
     paddingTop: "30px",
-    paddingBottom: "35px",
+    paddingBottom: "32px",
   },
 
   statCard: {
@@ -93,37 +91,10 @@ const useStyles = makeStyles((theme) => ({
     color: "#A069F6",
   },
 
-  pillTab: {
-    flex: 1,
-    textTransform: "none",
-    minHeight: 36,
-    borderRadius: 12,
-    margin: 4,
-    fontWeight: 600,
-    background: "transparent",
-    "&.Mui-selected": {
-      background: "linear-gradient(90deg,#f3e9ff,#efe8ff)",
-      color: "#A069F6",
-      boxShadow: "0 6px 12px rgba(111,47,181,0.08)",
-    },
-  },
-
   // Ranking list
   rankList: {
     marginTop: "14px",
     borderRadius: 12,
-  },
-  rankItem: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: "6px 12px",
-    borderRadius: 8,
-    cursor: "pointer",
-    transition: "background .15s",
-    "&:hover": {
-      background: "#faf6ff",
-    },
   },
   rankIndex: {
     width: 36,
@@ -161,10 +132,10 @@ const sampleData = Array.from({ length: 10 }).map((_, i) => ({
 export default function RewardRankingPage() {
   const classes = useStyles();
   const navigate = useNavigate(); // react-router v6
-
-  const [tab, setTab] = React.useState(0);
+  const { t } = useTranslation()
+  const [selectedTab, setSelectedTab] = useState(0);
   const [countdown, setCountdown] = React.useState(36000); // seconds demo
-
+  const labels = [t("rank.text7"), t("rank.text8"), t("rank.text9")]
   React.useEffect(() => {
     const t = setInterval(() => {
       setCountdown((s) => Math.max(0, s - 1));
@@ -172,17 +143,98 @@ export default function RewardRankingPage() {
     return () => clearInterval(t);
   }, []);
 
-  const formatCountdown = (s) => {
-    const h = String(Math.floor(s / 3600)).padStart(2, "0");
-    const m = String(Math.floor((s % 3600) / 60)).padStart(2, "0");
-    const sec = String(s % 60).padStart(2, "0");
+  const {
+    rankData, // 完整的data对象
+    rankList, // 列表数据（快捷访问）
+    loading,
+    error,
+    pagination,
+    changeRankType,
+    loadMore,
+    refetch,
+    getRankTypeText
+  } = useRankList("big", 1, 10);
+
+
+  const handleTabChange = (tabIndex) => {
+    setSelectedTab(tabIndex);
+    // 根据tabIndex执行相应的逻辑
+    // 根据Tab切换排行榜类型
+    let rankType;
+    switch (tabIndex) {
+      case 0:
+        rankType = "big";
+        break;
+      case 1:
+        rankType = "yongdong";
+        break;
+      case 2:
+        rankType = "new";
+        break;
+      default:
+        rankType = "big";
+    }
+    console.log(rankData);
+
+    changeRankType(rankType);
+  };
+
+  const formatCountdown = () => {
+    const now = new Date();
+    const targetTime = new Date();
+
+    // 设置目标时间为今天的22点
+    targetTime.setHours(22, 0, 0, 0);
+
+    // 如果当前时间已经超过今天的22点，目标时间设为明天的22点
+    if (now >= targetTime) {
+      targetTime.setDate(targetTime.getDate() + 1);
+    }
+
+    // 计算剩余毫秒数
+    const diffInMs = targetTime - now;
+    const diffInSeconds = Math.floor(diffInMs / 1000);
+
+    // 正确计算小时、分钟、秒
+    const hours = Math.floor(diffInSeconds / 3600);
+    const minutes = Math.floor((diffInSeconds % 3600) / 60);
+    const seconds = diffInSeconds % 60;
+
+    const h = String(hours).padStart(2, "0");
+    const m = String(minutes).padStart(2, "0");
+    const sec = String(seconds).padStart(2, "0");
+
     return `${h}:${m}:${sec}`;
   };
+
+  //加载更多
+  const loadMoreRef = useRef(null);
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry.isIntersecting && !loading && pagination.hasMore) {
+          loadMore();
+        }
+      },
+      { root: null, rootMargin: "0px", threshold: 0.1 }
+    );
+
+    if (loadMoreRef.current) observer.observe(loadMoreRef.current);
+
+    return () => {
+      if (loadMoreRef.current) observer.unobserve(loadMoreRef.current);
+    };
+  }, [loading, pagination.hasMore, loadMore]);
+
 
   return (
     <div className={classes.root}>
       {/* AppBar */}
-      <AppBar position="static" className={classes.appBar}>
+      <AppBar position="static" sx={{
+        background: "transparent",
+        boxShadow: "none",
+      }}>
         <Toolbar className={classes.toolbar}>
           <IconButton edge="start" onClick={() => navigate(-1)}>
             <ArrowBackIcon />
@@ -215,7 +267,7 @@ export default function RewardRankingPage() {
             display: "inline-block", // 重要：确保背景裁剪生效
           }}
         >
-          全站排行榜
+          {t("rank.text1")}
         </Typography>
 
         <img
@@ -246,134 +298,188 @@ export default function RewardRankingPage() {
         }}
       >
         {/* Tabs (pill) */}
-        <RankingTabs />
+        <RankingTabs onTabChange={handleTabChange} />
 
-        {/* Stat card */}
-        <Box className={classes.statCardWrap}>
-          <Paper className={classes.statCard} elevation={0}>
-            <Box className={classes.statHeaderRow}>
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                }}
-              >
-                <img
-                  src={require("../../static/image/pages/coin.png")}
-                  alt=""
-                  width={24}
-                  height={24}
-                  style={{
-                    marginRight: "6px",
-                  }}
-                />
-                <Typography
-                  variant="body2"
-                  style={{ color: "#333", fontSize: "14px" }}
-                >
-                  今日分红
-                </Typography>
-              </Box>
-
-              <Box className={classes.countdown}>
-                <Typography variant="body2">倒计时：</Typography>
-                <Typography variant="body2" style={{ fontWeight: 700 }}>
-                  {formatCountdown(countdown)}
-                </Typography>
-              </Box>
-            </Box>
-
-            <Box
-              sx={{
-                textAlign: "center",
-                bgcolor: "rgba(255, 255, 255, 0.40)",
-                borderRadius: "10px",
-                py: "16px",
-              }}
-            >
-              <Typography variant="body2" color="textSecondary">
-                大单奖金池(川普币)
-              </Typography>
-              <Typography className={classes.percentBadge}>50%分红</Typography>
-              <div className={classes.bigNumber}>233,565.00</div>
-            </Box>
-          </Paper>
-        </Box>
-
-        {/* Ranking list */}
-        <Box className={classes.rankList}>
-          <List disablePadding>
-            {sampleData.map((it, idx) => {
-              const medal =
-                idx === 0
-                  ? first
-                  : idx === 1
-                  ? second
-                  : idx === 2
-                  ? three
-                  : null;
-              return (
-                <ListItem
-                  key={idx}
-                  className={clsx(classes.rankItem, {
-                    [classes.top1]: idx === 0,
-                    [classes.top2]: idx === 1,
-                    [classes.top3]: idx === 2,
-                  })}
-                  onClick={() => {
-                    // 点击行可跳到详情页或其他
-                    // navigate(`/rank/${idx}`);
-                    console.log("click", idx);
-                  }}
-                >
-                  <div className={classes.rankIndex}>
-                    {idx < 3 ? (
+        <DataLoader
+          loading={loading}
+          error={error}
+          onRetry={refetch}
+          data={rankData}
+          loadingText={`加载中...`}
+          errorText={`加载失败`}
+        >
+          {rankData => (
+            <Box sx={{}}>          {/* Stat card */}
+              <Box className={classes.statCardWrap}>
+                <Box className={classes.statCard} elevation={0}>
+                  <Box className={classes.statHeaderRow}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
                       <img
-                        src={medal}
+                        src={require("../../static/image/pages/coin.png")}
                         alt=""
-                        style={{ width: 28, height: 28 }}
+                        width={24}
+                        height={24}
+                        style={{
+                          marginRight: "6px",
+                        }}
                       />
-                    ) : (
-                      String(idx + 1).padStart(2, "0")
-                    )}
-                  </div>
+                      <Typography
+                        variant="body2"
+                        style={{ color: "#333", fontSize: "14px" }}
+                      >
+                        {t("rank.text5")}
+                      </Typography>
+                    </Box>
 
-                  <Typography
-                    style={{
-                      fontSize: "14px",
-                      color: "#444",
+                    <Box className={classes.countdown}>
+                      <Typography variant="body2">{t("rank.text6")}</Typography>
+                      <Typography variant="body2" style={{ fontWeight: 700 }}>
+                        {formatCountdown(countdown)}
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  <Box
+                    sx={{
+                      textAlign: "center",
+                      bgcolor: "rgba(255, 255, 255, 0.40)",
+                      borderRadius: "10px",
+                      py: "16px",
                     }}
                   >
-                    {shortAddress(it.addr)}
-                  </Typography>
-
-                  <Typography
-                    variant="caption"
-                    style={{
-                      color: "#9653FF",
-                      fontSize: "14px",
+                    <Typography variant="body2" color="textSecondary">
+                      {labels[selectedTab] ?? labels[0]}
+                    </Typography>
+                    <Typography className={classes.percentBadge}>50%{t("rank.text10")}</Typography>
+                    <Typography className={classes.bigNumber}>{rankData.pool_total
+                    }</Typography>
+                  </Box>
+                  <Button
+                    variant="contained"
+                    sx={{
+                      width: "100%",
+                      mt: "20px",
+                      bgcolor: "#CFF174",
+                      color: "#333",
+                      fontWeight: "bold",
+                      borderRadius: "30px",
+                      boxShadow: "none",
+                      mb: "11px"
                     }}
                   >
-                    {it.amount} 川普币
-                  </Typography>
+                    转入
+                  </Button>
+                </Box>
+              </Box>
 
-                  <Typography
-                    style={{
-                      fontSize: "14px",
-                      color: "#95BE25",
-                    }}
-                  >
-                    {it.percent}
-                  </Typography>
+              {/* Ranking list */}
+              <Box className={classes.rankList}>
+                {rankData.list.length > 0 ?
+                  (<List disablePadding>
+                    {rankData.list.map((it, idx) => {
+                      const medal =
+                        idx === 0
+                          ? first
+                          : idx === 1
+                            ? second
+                            : idx === 2
+                              ? three
+                              : null;
+                      return (
+                        <ListItem
+                          key={idx}
+                          className={clsx({
+                            [classes.top1]: idx === 0,
+                            [classes.top2]: idx === 1,
+                            [classes.top3]: idx === 2,
+                          })}
+                          sx={{
+                            padding: "6px 12px",
+                            borderRadius: '8px',
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-around",
+                          }}
+                        >
+                          <div className={classes.rankIndex}>
+                            {idx < 3 ? (
+                              <img
+                                src={medal}
+                                alt=""
+                                style={{ width: 28, height: 28 }}
+                              />
+                            ) : (
+                              String(idx + 1).padStart(2, "0")
+                            )}
+                          </div>
 
-                  {/* <ChevronRightIcon
+                          <Typography
+                            style={{
+                              fontSize: "14px",
+                              color: "#444",
+                            }}
+                          >
+                            {shortAddress(it.addr)}
+                          </Typography>
+
+                          <Typography
+                            variant="caption"
+                            style={{
+                              color: "#9653FF",
+                              fontSize: "14px",
+                            }}
+                          >
+                            {it.amount} 川普币
+                          </Typography>
+
+                          <Typography
+                            style={{
+                              fontSize: "14px",
+                              color: "#95BE25",
+                            }}
+                          >
+                            {it.percent}
+                          </Typography>
+
+                          {/* <ChevronRightIcon
                     style={{ marginLeft: 8, color: "#c7b9ff" }}
                   /> */}
-                </ListItem>
-              );
-            })}
-          </List>
-        </Box>
+                        </ListItem>
+                      );
+                    })}
+                    {/* 👇 加载更多观察点 */}
+                    <div
+                      ref={loadMoreRef}
+                      style={{
+                        height: "40px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {loading && pagination.hasMore && (
+                        <Typography variant="body2" color="textSecondary">
+                          加载中...
+                        </Typography>
+                      )}
+                      {!pagination.hasMore && (
+                        <Typography variant="body2" color="textSecondary">
+                          已加载完全部数据
+                        </Typography>
+                      )}
+                    </div>
+                  </List>
+                  ) : (<Box>暂无数据</Box>)}
+
+              </Box>
+            </Box>
+          )}
+        </DataLoader>
       </Box>
     </div>
   );

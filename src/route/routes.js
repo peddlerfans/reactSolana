@@ -10,7 +10,10 @@ import MobileAssetPage from "../view/mobile/assetPage";
 import MobileRankPage from "../view/mobile/rankPage";
 import MobileRankList from "../view/mobile/rankList";
 import MobileCommunity from "../view/mobile/community"
-
+import MobileReward from "../view/mobile/reward";
+import MobileNftPage from "../view/mobile/nftPage"
+import MobileLanguage from "../view/mobile/language"
+import MobileStaticIncome from "../view/mobile/staticIncome"
 const router = [
   // Navigate 重定向
   { path: "/", element: <Navigate to="/home" /> },
@@ -23,6 +26,10 @@ const router = [
   { path: "/h5/rank", element: <MobileRankPage /> },
   { path: "/h5/rankList", element: <MobileRankList /> },
   { path: "/h5/community", element: <MobileCommunity /> },
+  { path: "/h5/reward", element: <MobileReward /> },
+  { path: "/h5/nftPage", element: <MobileNftPage /> },
+  { path: "/h5/language", element: <MobileLanguage /> },
+  { path: "/h5/staticIncome", element: <MobileStaticIncome /> },
 ];
 
 export default router;

@@ -146,7 +146,7 @@ const TodoList = () => {
 
     let globalStateKey = await getGlobalStateKey();
     let globalData = await program.account.globalState.fetch(globalStateKey);
-    // console.log(`globalData :`, JSON.stringify(globalData))
+    console.log(`globalData :`, JSON.stringify(globalData))
 
     //判断可以购买的时间
     if (globalData.startTime < currentTime) {

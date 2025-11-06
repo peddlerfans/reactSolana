@@ -12,6 +12,7 @@ import {
   ListItem
 } from "@mui/material";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
+import AssignmentIcon from "@material-ui/icons/Assignment";
 import React, { useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -19,6 +20,10 @@ import BottomDialog from "../../components/BottomDialog";
 import { makeStyles } from "@material-ui/core/styles";
 import daoIcon from "../../static/image/pages/daoIcon.png";
 import { useCurrentDate } from "../../hooks/data";
+import { usePoolBalance } from "../../hooks/usePoolBalance";
+import { DataLoader } from "../../components/DataLoader";
+import { useNftList } from "../../hooks/useNftList";
+import { useIncome } from "../../hooks/useIncome";
 const useStyles = makeStyles((theme) => ({
   root: {
     minHeight: "100vh",
@@ -100,6 +105,31 @@ export default function NftPage() {
   const [inputValue, setInputValue] = useState("");
   const [title, setTitle] = useState("")
   const [tab, setTab] = useState(0);
+  const {
+    balance,
+    loading,
+    error,
+    refetch
+  } = usePoolBalance(7);
+
+  const {
+    nftData,
+    loading: nftLoading,
+    error: nftError,
+    pagination,
+    loadMore,
+    refetch: nftRefetch,
+  } = useNftList(1, 10);
+  const {
+    incomeData,
+    incomeList,
+    loading: incomeLoading,
+    error: incomeError,
+    pagination: incomePagination,
+    loadMore: incomeLoadMore,
+    refetch: incomeRefetch,
+  } = useIncome(7, 1, 10);
+  console.log(nftData);
   const handleTabChange = (event, newValue) => {
     setTab(newValue);
   };
@@ -158,14 +188,6 @@ export default function NftPage() {
       date: "2026/06/06 11:11"
     }
   ]
-  const rightData = [
-    { id: 1, title: "NFT加权分红", percentage: "5%", amount: "+120川普币", date: "2026/06/06" },
-    { id: 2, title: "NFT加权分红", percentage: "5%", amount: "+120川普币", date: "2026/06/06" },
-    { id: 3, title: "NFT加权分红", percentage: "5%", amount: "+120川普币", date: "2026/06/06" },
-    { id: 4, title: "NFT加权分红", percentage: "5%", amount: "+120川普币", date: "2026/06/06" },
-    { id: 5, title: "NFT加权分红", percentage: "5%", amount: "+120川普币", date: "2026/06/06" },
-    { id: 6, title: "NFT加权分红", percentage: "5%", amount: "+120川普币", date: "2026/06/06" },
-  ]
   return (
     <Box
       sx={{
@@ -180,9 +202,17 @@ export default function NftPage() {
           boxShadow: "none",
         }}
       >
-        <Toolbar className={classes.toolbar}>
+        <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
           <IconButton edge="start" onClick={() => navigate(-1)}>
             <ArrowBackIcon />
+          </IconButton>
+          <IconButton
+            style={{ color: "#333" }}
+            onClick={() => {
+              navigate("/h5/nftTransfer");
+            }}
+          >
+            <AssignmentIcon />
           </IconButton>
         </Toolbar>
       </AppBar>
@@ -219,164 +249,219 @@ export default function NftPage() {
           }}
         />
       </Box>
-
-      {/* Stat card */}
-      <Box
-        sx={{
-          mx: "12px",
-          px: "12px",
-          py: "16px",
-          borderRadius: "12px",
-          boxShadow: "0 6px 20px rgba(79,67,141,0.08)",
-          zIndex: '10',
-          position: "relative",
-          border: "1px solid #fff",
-          background: "rgba(255, 255, 255, 0.70)",
-          backdropFilter: "blur(20px)",
-          flexShrink: "0",
-        }}
+      <DataLoader
+        loading={loading}
+        error={error}
+        onRetry={refetch}
+        data={balance}
+        loadingText={`加载中...`}
+        errorText={`加载失败`}
       >
-        <Box
+        {/* Stat card */}
+        {balance => (<Box
           sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
+            mx: "12px",
+            px: "12px",
+            py: "16px",
+            borderRadius: "12px",
+            boxShadow: "0 6px 20px rgba(79,67,141,0.08)",
+            zIndex: '10',
+            position: "relative",
+            border: "1px solid #fff",
+            background: "rgba(255, 255, 255, 0.70)",
+            backdropFilter: "blur(20px)",
+            flexShrink: "0",
           }}
         >
           <Box
             sx={{
               display: "flex",
+              justifyContent: "space-between",
               alignItems: "center",
             }}
           >
-            <img
-              src={require("../../static/image/pages/coin.png")}
-              alt=""
-              width={24}
-              height={24}
-              style={{
-                marginRight: "6px",
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
               }}
-            />
+            >
+              <img
+                src={require("../../static/image/pages/coin.png")}
+                alt=""
+                width={24}
+                height={24}
+                style={{
+                  marginRight: "6px",
+                }}
+              />
+              <Typography
+                variant="body2"
+                style={{ color: "#333", fontSize: "14px" }}
+              >
+                {t("nft.text2")}
+              </Typography>
+            </Box>
+
+            <Box>
+              <Typography variant="body2">{currentDate}</Typography>
+            </Box>
+          </Box>
+          {/* 中间box */}
+          <Box
+            sx={{
+              textAlign: "center",
+              bgcolor: "#EEEDF4",
+              borderRadius: "10px",
+              py: "16px",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+              marginTop: "12px",
+              marginBottom: "16px",
+            }}
+          >
+            <Typography
+              variant="body2"
+              color="textSecondary"
+              sx={{
+                color: "#888",
+                fontSize: "13px",
+              }}
+            >
+              NFT奖金池(川普币)
+            </Typography>
+            <Typography
+              sx={{
+                bgcolor: "#E8DAFF",
+                borderRadius: "6px",
+                color: "#A069F6",
+                px: "8px",
+                py: "5px",
+                width: "72px",
+                my: "10px",
+                fontSize: "13px",
+              }}
+            >
+              50%分红
+            </Typography>
+            <Typography
+              sx={{
+                color: "#333",
+                fontSize: "36px",
+                fontWeight: "600",
+              }}
+            >
+              {balance?.total_amount || 0}
+            </Typography>
+          </Box>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              mb: "20px"
+            }}
+          >
+            <Typography
+              variant="body2"
+              style={{ color: "#888", fontSize: "14px" }}
+            >
+              {t("reward.text12")}
+            </Typography>
+
             <Typography
               variant="body2"
               style={{ color: "#333", fontSize: "14px" }}
             >
-              {t("nft.text2")}
+              {balance?.account_balance + t("trump")}
             </Typography>
           </Box>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              mb: "20px"
+            }}
+          >
+            <Typography
+              variant="body2"
+              style={{ color: "#888", fontSize: "14px" }}
+            >
+              剩余奖励额度
+            </Typography>
 
-          <Box>
-            <Typography variant="body2">{currentDate}</Typography>
+            <Typography
+              variant="body2"
+              style={{ color: "#A069F6", fontSize: "14px" }}
+            >
+              {balance?.left_reward_balance + t("trump")}
+            </Typography>
           </Box>
-        </Box>
-        {/* 中间box */}
-        <Box
-          sx={{
-            textAlign: "center",
-            bgcolor: "#EEEDF4",
-            borderRadius: "10px",
-            py: "16px",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-            marginTop: "12px",
-            marginBottom: "16px",
-          }}
-        >
-          <Typography
-            variant="body2"
-            color="textSecondary"
-            sx={{
-              color: "#888",
-              fontSize: "13px",
-            }}
-          >
-            大单奖金池(川普币)
-          </Typography>
-          <Typography
-            sx={{
-              bgcolor: "#E8DAFF",
-              borderRadius: "6px",
-              color: "#A069F6",
-              px: "8px",
-              py: "5px",
-              width: "72px",
-              my: "10px",
-              fontSize: "13px",
-            }}
-          >
-            50%分红
-          </Typography>
-          <Typography
-            sx={{
-              color: "#333",
-              fontSize: "36px",
-              fontWeight: "600",
-            }}
-          >
-            233,565.00
-          </Typography>
-        </Box>
-        <Button
-          onClick={() => handleOpenDialog('transferIn')}
-          variant="contained"
-          sx={{
-            width: "100%",
-            mt: "20px",
-            bgcolor: "#A069F6",
-            color: "#FFF",
-            fontWeight: "bold",
-            borderRadius: "30px",
-            boxShadow: "none",
-            mb: "11px"
-          }}
-        >
-          转入
-        </Button>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
           <Button
-            onClick={() => handleOpenDialog('outNft')}
+            onClick={() => handleOpenDialog('transferIn')}
             variant="contained"
             sx={{
-              px: '48px',
-              py: '10px',
-              bgcolor: "#CFF174",
-              color: "#333",
+              width: "100%",
+              mt: "20px",
+              bgcolor: "#A069F6",
+              color: "#FFF",
               fontWeight: "bold",
               borderRadius: "30px",
               boxShadow: "none",
-              fontSize: '15px'
+              mb: "11px"
             }}
           >
-            转出NFT
+            转入
           </Button>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Button
+              onClick={() => handleOpenDialog('outNft')}
+              variant="contained"
+              sx={{
+                px: '48px',
+                py: '10px',
+                bgcolor: "#CFF174",
+                color: "#333",
+                fontWeight: "bold",
+                borderRadius: "30px",
+                boxShadow: "none",
+                fontSize: '15px'
+              }}
+            >
+              转出NFT
+            </Button>
 
-          <Button
-            onClick={() => handleOpenDialog('transferOut')}
-            variant="contained"
-            sx={{
-              px: '48px',
-              py: '10px',
-              bgcolor: "#CFF174",
-              color: "#333",
-              fontWeight: "bold",
-              borderRadius: "30px",
-              boxShadow: "none",
-              fontSize: '15px'
-            }}
-          >
-            转出收益
-          </Button>
-        </Box>
-      </Box>
+            <Button
+              onClick={() => handleOpenDialog('transferOut')}
+              variant="contained"
+              sx={{
+                px: '48px',
+                py: '10px',
+                bgcolor: "#CFF174",
+                color: "#333",
+                fontWeight: "bold",
+                borderRadius: "30px",
+                boxShadow: "none",
+                fontSize: '15px'
+              }}
+            >
+              转出收益
+            </Button>
+          </Box>
+          <Typography sx={{ textAlign: "center", color: "#999", fontSize: "13px", mt: "17px" }}>{"转出记录>"}</Typography>
+        </Box>)}
+
+      </DataLoader>
+
 
       <Tabs
         value={tab}
@@ -420,56 +505,66 @@ export default function NftPage() {
           // 在你的组件中
           <Paper sx={{ borderRadius: 2, boxShadow: "none", p: 2, backgroundColor: "#F1EFF9" }}>
             <List sx={{ py: 0 }}>
-              {leftData.map((item, index) => (
-                <ListItem
-                  key={item.id}
-                  sx={{
-                    bgcolor: "#FFF",
-                    borderRadius: "12px",
-                    display: "block",
-                    p: "16px",
-                    mb: index === leftData.length - 1
-                      ? 0 : "12px"
-                  }}
-                >
-                  {/* 名称 */}
-                  <Typography
-                    variant="body1"
+              <DataLoader
+                loading={nftLoading}
+                error={nftError}
+                onRetry={nftRefetch}
+                data={nftData}
+                loadingText={`加载中...`}
+                errorText={`加载失败`}
+              >
+                {nftData?.map((item, index) => (
+                  <ListItem
+                    key={item.id}
                     sx={{
-                      fontSize: "16px",
-                      color: "#333",
-                      fontWeight: "bold",
-                      mb: 1
+                      bgcolor: "#FFF",
+                      borderRadius: "12px",
+                      display: "block",
+                      p: "16px",
+                      mb: index === nftData?.length - 1
+                        ? 0 : "12px"
                     }}
                   >
-                    {item.name}
-                  </Typography>
+                    {/* 名称 */}
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        fontSize: "16px",
+                        color: "#333",
+                        fontWeight: "bold",
+                        mb: 1
+                      }}
+                    >
+                      {item.name || 'NFT'}
+                    </Typography>
 
-                  {/* 地址 */}
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      fontSize: "14px",
-                      color: "#666",
-                      mb: 1,
-                      fontFamily: "'Monospace', 'Courier New', monospace"
-                    }}
-                  >
-                    {item.address}
-                  </Typography>
+                    {/* 地址 */}
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontSize: "14px",
+                        color: "#666",
+                        mb: 1,
+                        fontFamily: "'Monospace', 'Courier New', monospace"
+                      }}
+                    >
+                      {item.contract_address}
+                    </Typography>
 
-                  {/* 日期 */}
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      fontSize: "12px",
-                      color: "#999"
-                    }}
-                  >
-                    {item.date}
-                  </Typography>
-                </ListItem>
-              ))}
+                    {/* 日期 */}
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontSize: "12px",
+                        color: "#999"
+                      }}
+                    >
+                      {item.create_time}
+                    </Typography>
+                  </ListItem>
+                ))}
+              </DataLoader>
+
             </List>
           </Paper>
         )}
@@ -477,37 +572,51 @@ export default function NftPage() {
         {tab === 1 && (
           <Paper sx={{ borderRadius: 2, boxShadow: "none", p: 2, backgroundColor: "#F1EFF9" }}>
             <List sx={{ py: 0 }}>
-              {rightData.map((item, index) => (
-                <ListItem key={item.id} sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  borderRadius: '12px',
-                  p: '16px',
-                  alignItems: 'center', bgcolor: '#fff',
-                  mb: index === rightData.length - 1
-                    ? 0 : "12px"
-                }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'start', alignItems: 'center' }}>
-                    <img src={require("../../static/image/pages/nftIcon.png")} alt="" width={20} height={20} />
-                    <Box sx={{ ml: "10px" }}>
-                      <Typography sx={{ fontSize: '14px', color: '#333' }} >{item.title}</Typography>
-                      <Typography sx={{
-                        width: '40px',
-                        height: '20px',
-                        color: '#A069F6',
-                        borderRadius: '4px',
-                        fontSize: '13px',
-                        bgcolor: 'rgba(160, 105, 246, 0.15)',
-                        lineHeight: '20px', textAlign: 'center'
-                      }}>{item.percentage}</Typography>
-                    </Box>
-                  </Box>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'start' }}>
-                    <Typography sx={{ fontSize: '15px', color: '#9ACD12' }}>{item.amount}</Typography>
-                    <Typography sx={{ fontSize: '14px', color: '#999' }}>{item.date}</Typography>
-                  </Box>
-                </ListItem>
-              ))}
+              <DataLoader
+                loading={incomeLoading}
+                error={incomeError}
+                onRetry={incomeRefetch}
+                data={incomeData}
+                loadingText={`加载中...`}
+                errorText={`加载失败`}
+              >
+                {incomeData => (
+                  incomeData.map((item, index) => (
+                    <ListItem key={item.id} sx={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      borderRadius: '12px',
+                      p: '16px',
+                      alignItems: 'center', bgcolor: '#fff',
+                      mb: index === incomeData.length - 1
+                        ? 0 : "12px"
+                    }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'start', alignItems: 'center' }}>
+                        <img src={require("../../static/image/pages/nftIcon.png")} alt="" width={20} height={20} />
+                        <Box sx={{ ml: "10px" }}>
+                          <Typography sx={{ fontSize: '14px', color: '#333' }} >NFT分红</Typography>
+                          <Typography sx={{
+                            width: '40px',
+                            height: '20px',
+                            color: '#A069F6',
+                            borderRadius: '4px',
+                            fontSize: '13px',
+                            bgcolor: 'rgba(160, 105, 246, 0.15)',
+                            lineHeight: '20px', textAlign: 'center'
+                          }}>{item.extra_info.my_percent}</Typography>
+                        </Box>
+                      </Box>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'start' }}>
+                        <Typography sx={{ fontSize: '15px', color: '#9ACD12' }}>{t('reward.text15', { value: item.amount })}</Typography>
+                        <Typography sx={{ fontSize: '14px', color: '#999' }}>{item.create_time}</Typography>
+                      </Box>
+                    </ListItem>
+                  ))
+
+                )}
+
+              </DataLoader>
+
             </List>
           </Paper>
         )}

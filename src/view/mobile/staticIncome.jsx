@@ -19,6 +19,9 @@ import BottomDialog from "../../components/BottomDialog";
 import { makeStyles } from "@material-ui/core/styles";
 import daoIcon from "../../static/image/pages/staticIcon.png";
 import { useCurrentDate } from "../../hooks/data";
+import { usePoolBalance } from "../../hooks/usePoolBalance";
+import { useIncome } from "../../hooks/useIncome";
+import { DataLoader } from "../../components/DataLoader";
 const useStyles = makeStyles((theme) => ({
   root: {
     minHeight: "100vh",
@@ -49,6 +52,20 @@ export default function NftPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [title, setTitle] = useState("")
+  const {
+    balance,
+    loading,
+    error,
+    refetch
+  } = usePoolBalance(1);
+  const {
+    incomeData,
+    loading: incomeLoading,
+    error: incomeError,
+    refetch: incomeRefetch,
+    loadMore
+  } = useIncome(1)
+
   const handleOpenDialog = useCallback((str) => {
     if (str === 'transferIn') {
       setTitle("转入NFT");
@@ -78,32 +95,6 @@ export default function NftPage() {
     setInputValue(event.target.value);
   };
 
-  const leftData = [
-    {
-      id: 1,
-      name: "名称名称名称名称",
-      address: "GjWWGhX...Rh9d5y3Wstvn58",
-      date: "2026/06/06 11:11"
-    },
-    {
-      id: 2,
-      name: "名称名称名称名称",
-      address: "GjWWGhX...Rh9d5y3Wstvn58",
-      date: "2026/06/06 11:11"
-    },
-    {
-      id: 3,
-      name: "名称名称名称名称",
-      address: "GjWWGhX...Rh9d5y3Wstvn58",
-      date: "2026/06/06 11:11"
-    },
-    {
-      id: 4,
-      name: "名称名称名称名称",
-      address: "GjWWGhX...Rh9d5y3Wstvn58",
-      date: "2026/06/06 11:11"
-    }
-  ]
   return (
     <Box
       sx={{
@@ -157,192 +148,203 @@ export default function NftPage() {
           }}
         />
       </Box>
-
-      {/* Stat card */}
-      <Box
-        sx={{
-          mx: "12px",
-          px: "12px",
-          py: "16px",
-          borderRadius: "12px",
-          boxShadow: "0 6px 20px rgba(79,67,141,0.08)",
-          zIndex: '10',
-          position: "relative",
-          border: "1px solid #fff",
-          background: "rgba(255, 255, 255, 0.70)",
-          backdropFilter: "blur(20px)",
-          flexShrink: "0",
-        }}
+      <DataLoader
+        loading={loading}
+        error={error}
+        refetch={refetch}
+        data={balance}
       >
-        <Box
+        {/* Stat card */}
+        {balance => (<Box
           sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
+            mx: "12px",
+            px: "12px",
+            py: "16px",
+            borderRadius: "12px",
+            boxShadow: "0 6px 20px rgba(79,67,141,0.08)",
+            zIndex: '10',
+            position: "relative",
+            border: "1px solid #fff",
+            background: "rgba(255, 255, 255, 0.70)",
+            backdropFilter: "blur(20px)",
+            flexShrink: "0",
           }}
         >
           <Box
             sx={{
               display: "flex",
+              justifyContent: "space-between",
               alignItems: "center",
-              mb: "20px"
             }}
           >
-            <img
-              src={require("../../static/image/pages/coin.png")}
-              alt=""
-              width={24}
-              height={24}
-              style={{
-                marginRight: "6px",
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                mb: "20px"
               }}
-            />
-            <Typography
-              variant="body2"
-              style={{ color: "#333", fontSize: "14px" }}
             >
-              {t("nft.text2")}
+              <img
+                src={require("../../static/image/pages/coin.png")}
+                alt=""
+                width={24}
+                height={24}
+                style={{
+                  marginRight: "6px",
+                }}
+              />
+              <Typography
+                variant="body2"
+                style={{ color: "#333", fontSize: "14px" }}
+              >
+                {t("nft.text2")}
+              </Typography>
+            </Box>
+
+            <Box>
+              <Typography variant="body2">{currentDate}</Typography>
+            </Box>
+          </Box>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              mb: "20px",
+            }}
+          >
+            <Typography variant="body1" sx={{ fontSize: "14px", color: "#888" }}>
+              您的贡献值：
+            </Typography>
+            <Typography variant="body1" sx={{ fontSize: "14px", color: "#333" }}>
+              {balance.person_contribution_value + t("trump")}
             </Typography>
           </Box>
-
-          <Box>
-            <Typography variant="body2">{currentDate}</Typography>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              mb: "20px",
+            }}
+          >
+            <Typography variant="body1" sx={{ fontSize: "14px", color: "#888" }}>
+              全网个人贡献值总和：
+            </Typography>
+            <Typography variant="body1" sx={{ fontSize: "14px", color: "#333" }}>
+              {balance.total_contribution + t("trump")}
+            </Typography>
           </Box>
-        </Box>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            mb: "20px",
-          }}
-        >
-          <Typography variant="body1" sx={{ fontSize: "14px", color: "#888" }}>
-            {t("assets.text4")}
-          </Typography>
-          <Typography variant="body1" sx={{ fontSize: "14px", color: "#333" }}>
-            18514{t("trump")}
-          </Typography>
-        </Box>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            mb: "20px",
-          }}
-        >
-          <Typography variant="body1" sx={{ fontSize: "14px", color: "#888" }}>
-            {t("assets.text4")}
-          </Typography>
-          <Typography variant="body1" sx={{ fontSize: "14px", color: "#333" }}>
-            18514{t("trump")}
-          </Typography>
-        </Box>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            mb: "20px",
-          }}
-        >
-          <Typography variant="body1" sx={{ fontSize: "14px", color: "#888" }}>
-            {t("assets.text4")}
-          </Typography>
-          <Typography variant="body1" sx={{ fontSize: "14px", color: "#333" }}>
-            18514{t("trump")}
-          </Typography>
-        </Box>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            mb: "20px",
-          }}
-        >
-          <Typography variant="body1" sx={{ fontSize: "14px", color: "#888" }}>
-            {t("assets.text4")}
-          </Typography>
-          <Typography variant="body1" sx={{ fontSize: "14px", color: "#333" }}>
-            18514{t("trump")}
-          </Typography>
-        </Box>
-        <Button
-          onClick={() => handleOpenDialog('transferIn')}
-          variant="contained"
-          sx={{
-            width: "100%",
-            mt: "20px",
-            bgcolor: "#CFF174",
-            color: "#FFF",
-            fontWeight: "bold",
-            borderRadius: "30px",
-            boxShadow: "none",
-            mb: "11px"
-          }}
-        >
-          转出
-        </Button>
-      </Box>
-      <Box>
-        <Paper sx={{ borderRadius: 2, boxShadow: "none", p: 2, backgroundColor: "#F1EFF9" }}>
-          <List sx={{ py: 0 }}>
-            {leftData.map((item, index) => (
-              <ListItem
-                key={item.id}
-                sx={{
-                  bgcolor: "#FFF",
-                  borderRadius: "12px",
-                  display: "block",
-                  p: "16px",
-                  mb: index === leftData.length - 1
-                    ? 0 : "12px"
-                }}
-              >
-                {/* 名称 */}
-                <Typography
-                  variant="body1"
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              mb: "20px",
+            }}
+          >
+            <Typography variant="body1" sx={{ fontSize: "14px", color: "#888" }}>
+              可提现奖励：
+            </Typography>
+            <Typography variant="body1" sx={{ fontSize: "14px", color: "#333" }}>
+              {balance.account_balance + t("trump")}
+            </Typography>
+          </Box>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              mb: "20px",
+            }}
+          >
+            <Typography variant="body1" sx={{ fontSize: "14px", color: "#888" }}>
+              剩余奖励额度：
+            </Typography>
+            <Typography variant="body1" sx={{ fontSize: "14px", color: "#A069F6" }}>
+              {balance.left_reward_balance + t("trump")}
+            </Typography>
+          </Box>
+          <Button
+            onClick={() => handleOpenDialog('transferIn')}
+            variant="contained"
+            sx={{
+              width: "100%",
+              mt: "20px",
+              bgcolor: "#CFF174",
+              color: "#FFF",
+              fontWeight: "bold",
+              borderRadius: "30px",
+              boxShadow: "none",
+              mb: "11px"
+            }}
+          >
+            转出
+          </Button>
+        </Box>)}
+      </DataLoader>
+
+
+
+      <DataLoader
+        loading={incomeLoading}
+        error={incomeError}
+        data={incomeData}
+        refetch={incomeRefetch}
+      >
+        <Box>
+          <Paper sx={{ borderRadius: 2, boxShadow: "none", p: 2, backgroundColor: "#F1EFF9" }}>
+            <List sx={{ py: 0 }}>
+              {incomeData?.map((item, index) => (
+                <ListItem
+                  key={item.id}
                   sx={{
-                    fontSize: "16px",
-                    color: "#333",
-                    fontWeight: "bold",
-                    mb: 1
+                    bgcolor: "#FFF",
+                    borderRadius: "12px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    p: "16px",
+                    mb: index === incomeData?.length - 1
+                      ? 0 : "12px"
                   }}
                 >
-                  {item.name}
-                </Typography>
+                  <Box sx={{
+                    display: "flex",
+                    alignItems: "center"
+                  }}>
+                    <img src={require("../../static/image/pages/staticItem.png")} alt="" width={20} height={20} />
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontSize: "14px",
+                        color: "#444",
+                        ml: "10px",
+                      }}
+                    >
+                      静态分红
+                    </Typography>
+                  </Box>
 
-                {/* 地址 */}
-                <Typography
-                  variant="body2"
-                  sx={{
-                    fontSize: "14px",
-                    color: "#666",
-                    mb: 1,
-                    fontFamily: "'Monospace', 'Courier New', monospace"
-                  }}
-                >
-                  {item.address}
-                </Typography>
 
-                {/* 日期 */}
-                <Typography
-                  variant="body2"
-                  sx={{
-                    fontSize: "12px",
-                    color: "#999"
-                  }}
-                >
-                  {item.date}
-                </Typography>
-              </ListItem>
-            ))}
-          </List>
-        </Paper>
+                  {/* 日期 */}
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontSize: "14px",
+                      color: "#95BE25"
+                    }}
+                  >
+                    {item.amount}
+                  </Typography>
+                </ListItem>
+              ))}
+            </List>
+          </Paper>
 
-      </Box>
+        </Box>
+      </DataLoader>
+
 
       <BottomDialog
         open={dialogOpen}

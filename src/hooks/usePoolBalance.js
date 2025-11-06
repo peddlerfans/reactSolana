@@ -76,21 +76,21 @@ export const usePoolBalance = (poolType, level = null) => {
   // 初始化加载
   useEffect(() => {
     // 如果是团队等级奖励但没有level，先不请求
-    if (poolType === 3 && !level) {
-      setLoading(false);
-      setError("查询团队等级奖励需要level参数");
-      return;
-    }
+    // if (poolType === 3 && !level) {
+    //   setLoading(false);
+    //   setError("查询团队等级奖励需要level参数");
+    //   return;
+    // }
 
     fetchPoolBalance();
   }, []);
 
   // 当poolType或level变化时重新获取
   useEffect(() => {
-    if (poolType === 3 && !level) {
-      setError("查询团队等级奖励需要level参数");
-      return;
-    }
+    // if (poolType === 3 && !level) {
+    //   setError("查询团队等级奖励需要level参数");
+    //   return;
+    // }
 
     fetchPoolBalance();
   }, [poolType, level]);

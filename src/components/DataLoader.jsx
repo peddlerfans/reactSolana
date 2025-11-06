@@ -5,11 +5,11 @@ import { Box, CircularProgress, Typography, Button, Alert } from '@mui/material'
 /**
  * 数据加载组件 - 安全版本
  */
-export const DataLoader = ({ 
-  loading, 
-  error, 
+export const DataLoader = ({
+  loading,
+  error,
   data,
-  children, 
+  children,
   loadingText = '加载中...',
   errorText = '加载失败',
   minHeight = 200,
@@ -18,10 +18,10 @@ export const DataLoader = ({
   // 加载状态
   if (loading) {
     return (
-      <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
+      <Box sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
         minHeight,
         flexDirection: 'column',
         gap: 2
@@ -36,12 +36,12 @@ export const DataLoader = ({
   if (error) {
     return (
       <Box sx={{ p: 3 }}>
-        <Alert 
+        <Alert
           severity="error"
           action={
             onRetry && (
-              <Button 
-                color="inherit" 
+              <Button
+                color="inherit"
                 size="small"
                 onClick={onRetry}
               >
@@ -60,9 +60,10 @@ export const DataLoader = ({
   try {
     if (typeof children === 'function') {
       const result = children(data);
+      if (Array.isArray(result)) return <>{result}</>;
       return React.isValidElement(result) ? result : null;
     } else {
-      return React.isValidElement(children) ? children : null;
+      return <>{children}</>;
     }
   } catch (err) {
     console.error('DataLoader渲染错误:', err);

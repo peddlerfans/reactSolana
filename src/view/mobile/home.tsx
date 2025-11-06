@@ -174,7 +174,7 @@ const TodoList = () => {
       return Promise.resolve(cachedPrice);
     }
 
-    const response = await axios.get('https://api.dexscreener.com/latest/dex/tokens/So11111111111111111111111111111111111111112');
+    const response = await axios.get('https://api.dexscreener.com/latest/dex/tokens/5e2qRc1DNEXmyxP8qwPwJhRWjef7usLyi7v5xjqLr5G7');
     // console.log(`price :`, response.data['pairs'][0].priceUsd)
     cachedPrice = response.data['pairs'][0].priceUsd;
     // console.log("从DexScreener获取SOL的美元价格:",cachedPrice);
@@ -416,10 +416,10 @@ ATA就是这个保险箱的地址
 
   /**useEffect替代生命周期函数componentDidMount和componentDidUpdate */
   useEffect(() => {
-    getData()
-    setInterval(() => {
-      getData()
-    }, 15000)
+    // getData()
+    // setInterval(() => {
+    //   getData()
+    // }, 15000)
     // console.log("componentDidMount");
   }, [wallet])
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     AppBar,
@@ -27,15 +27,15 @@ import iconCommunity from '../static/image/menu/community.png';
 import iconLanguage from '../static/image/menu/lang.png';
 import iconAddress from '../static/image/menu/address.png';
 import iconStatic from '../static/image/menu/static.png';
-
-const Header: React.FC<{ showWallet?: boolean }> = ({ showWallet = true }) => {
+import GlobalSnackbar from './GlobalSnackbar';
+const Header: React.FC<{ showWallet?: boolean, address?: string }> = ({ showWallet = true }, { address }) => {
     const [open, setOpen] = React.useState(false);
+    const [toast, setToast] = useState({ open: false, message: '', type: 'success' });
     const toggleDrawer = (newOpen: boolean) => () => setOpen(newOpen);
     const navigate = useNavigate();
     const { t } = useTranslation();
-    // 示例地址
-    const address = "0xa8u921...5cs4";
-
+    console.log(address);
+    
     const menuItemsTop = [
         { text: t("drawer.text2"), icon: iconAsset, url: "/h5/asset" },
         { text: t("drawer.text3"), icon: iconReward, url: "/h5/reward" },
@@ -51,7 +51,11 @@ const Header: React.FC<{ showWallet?: boolean }> = ({ showWallet = true }) => {
     ];
 
     function navigatePage(data: any) {
-        navigate(data.url)
+        if (localStorage.getItem("token")) {
+            navigate(data.url)
+        } else {
+            setToast({ open: true, message: "请先链接钱包", type: "error" })
+        }
     }
 
     const DrawerList = (
@@ -157,6 +161,12 @@ const Header: React.FC<{ showWallet?: boolean }> = ({ showWallet = true }) => {
                     {showWallet ? <WalletMultiButton /> : null}
                 </Box>
             </Toolbar>
+            <GlobalSnackbar
+                open={toast.open}
+                onClose={() => setToast({ ...toast, open: false })}
+                message={toast.message}
+                severity={toast.type}
+            />
         </AppBar>
     );
 };

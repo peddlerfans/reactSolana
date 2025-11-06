@@ -115,6 +115,7 @@ const Content: FC = () => {
   const [locationUrl, changeUrl] = useState(location.pathname);
   const [backgrounImg, setBackgrounImg] = useState("")
   const [backgroundColor, setBackgrounColor] = useState("")
+  const [ address , setAddress ] = useState("")
   useEffect(() => {
     // update on route change
     changeUrl(location.pathname);
@@ -165,7 +166,7 @@ const Content: FC = () => {
         try {
           const walletAddress = publicKey.toString();
           console.log('钱包已连接，地址:', walletAddress);
-
+          setAddress(walletAddress)
           // 直接调用登录接口
           const loginResult = await apiService.user.login({
             mail: "0x95Cd4e05198A73E32453E65507e47fEc4b57f1f9",
@@ -218,7 +219,7 @@ const Content: FC = () => {
       }}
     >
       {/* 如果你想 header 在所有页面显示，把 shouldShowHeader() 改为 true */}
-      {shouldShowHeader() ? <Header showWallet={true} /> : <div></div>}
+      {shouldShowHeader() ? <Header showWallet={true} address={address}/> : <div></div>}
 
       {/* 渲染路由 */}
       {ElementRouter}

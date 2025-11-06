@@ -2,11 +2,20 @@ import React, { useState } from "react";
 import RewardHeader from "../../components/RewardHeader";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
-import ListItemText from "@mui/material/ListItemText";
 import ListSubheader from "@mui/material/ListSubheader";
 import { Box, Typography, Tabs, Tab, Paper } from "@mui/material";
+import { useIncome } from "../../hooks/useIncome";
+import { DataLoader } from "../../components/DataLoader";
 export default function RankList() {
   const [tab, setTab] = useState(0);
+  const {
+    incomeData,
+    loading,
+    error,
+    refetch,
+    loadMore,
+    changeIncomeType
+  } = useIncome(4, 1, 10)
   const groupedData = [
     {
       date: "2024/01/15",
@@ -34,9 +43,10 @@ export default function RankList() {
   ];
   const handleTabChange = (event, newValue) => {
     setTab(newValue);
+    changeIncomeType(newValue + 4)
   };
   return (
-    <Box sx={{ padding: "0 12px" ,width:"100%",boxSizing: "border-box"}}>
+    <Box sx={{ padding: "0 12px", width: "100%", boxSizing: "border-box" }}>
       <RewardHeader title="我的记录" />
       <Tabs
         value={tab}
@@ -47,7 +57,7 @@ export default function RankList() {
           borderRadius: "20px",
           p: "6px",
           minHeight: "44px",
-          marginBottom:"14px",
+          marginBottom: "14px",
           "& .MuiTabs-indicator": {
             display: "none", // 隐藏默认的底部指示器
           },
@@ -108,7 +118,7 @@ export default function RankList() {
         {/* 固定表头 */}
         <ListSubheader
           sx={{
-            background:"none",
+            background: "none",
             borderBottom: "1px solid #e0e0e0",
             zIndex: 2,
             position: "sticky",
@@ -121,7 +131,7 @@ export default function RankList() {
               justifyContent: "space-between",
               alignItems: "center",
               px: "12px",
-              minHeight:"48px",
+              minHeight: "48px",
               py: 1,
             }}
           >
@@ -147,51 +157,61 @@ export default function RankList() {
         </ListSubheader>
 
         {/* 分组内容 */}
-        {groupedData.map((group, sectionId) => (
-          <li key={`section-${sectionId}`}>
-            <ul>
-              {group.items.map((item, itemIndex) => (
-                <ListItem key={`item-${sectionId}-${itemIndex}`}>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      width: "100%",
-                      px: "12px",
-                      minHeight:"48px",
-                    }}
-                  >
-                    <Typography
-                      variant="body2"
-                      sx={{ width: "60px", fontWeight: "bold" }}
-                    >
-                      {item.rank}
-                    </Typography>
-                    <Typography
-                      variant="body1"
+        <DataLoader
+          loading={loading}
+          error={error}
+          onRetry={refetch}
+          data={incomeData}
+          loadingText={`加载中...`}
+          errorText={`加载失败`}
+        >
+          {incomeData => (
+            <li>
+              <ul>
+                {incomeData.map((item, itemIndex) => (
+                  <ListItem key={`item-${itemIndex}`}>
+                    <Box
                       sx={{
-                        flex: 1,
-                        textAlign: "center",
-                        fontWeight: "bold",
-                        color: "#52c41a",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        width: "100%",
+                        px: "12px",
+                        minHeight: "48px",
                       }}
                     >
-                      {item.dividend}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      sx={{ width: "100px", textAlign: "right" }}
-                      color="text.secondary"
-                    >
-                      {group.date}
-                    </Typography>
-                  </Box>
-                </ListItem>
-              ))}
-            </ul>
-          </li>
-        ))}
+                      <Typography
+                        variant="body2"
+                        sx={{ width: "60px", fontWeight: "bold" }}
+                      >
+                        {item.user_level}
+                      </Typography>
+                      <Typography
+                        variant="body1"
+                        sx={{
+                          flex: 1,
+                          textAlign: "center",
+                          fontWeight: "bold",
+                          color: "#52c41a",
+                        }}
+                      >
+                        {item.amount}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{ width: "100px", textAlign: "right" }}
+                        color="text.secondary"
+                      >
+                        {item.create_time}
+                      </Typography>
+                    </Box>
+                  </ListItem>
+                ))}
+              </ul>
+            </li>
+          )}
+        </DataLoader>
+
       </List>
     </Box>
   );

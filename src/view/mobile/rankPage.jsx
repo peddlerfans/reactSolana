@@ -20,6 +20,7 @@ import { useNavigate } from "react-router-dom"; // react-router v6
 import RankingTabs from "../../components/PillTab";
 import { useRankList } from "../../hooks/useRankList";
 import { DataLoader } from "../../components/DataLoader";
+import { usePoolBalance } from "../../hooks/usePoolBalance";
 // 本地图片导入（替换为你的真实路径）
 import rankImg from "../../static/image/pages/rankImg.png"; // 顶部背景（示例）
 import daoIcon from "../../static/image/pages/dao_avatar.png"; // 中间 DAO 圆形图
@@ -155,6 +156,12 @@ export default function RewardRankingPage() {
     getRankTypeText
   } = useRankList("big", 1, 10);
 
+  const {
+    balance,
+    loading: balanceLoading,
+    error: balanceError,
+    changePoolType
+  } = usePoolBalance(4);
 
   const handleTabChange = (tabIndex) => {
     setSelectedTab(tabIndex);
@@ -174,8 +181,7 @@ export default function RewardRankingPage() {
       default:
         rankType = "big";
     }
-    console.log(rankData);
-
+    changePoolType(tabIndex + 4)
     changeRankType(rankType);
   };
 
@@ -350,6 +356,7 @@ export default function RewardRankingPage() {
                       bgcolor: "rgba(255, 255, 255, 0.40)",
                       borderRadius: "10px",
                       py: "16px",
+                      mb: "20px"
                     }}
                   >
                     <Typography variant="body2" color="textSecondary">
@@ -359,6 +366,51 @@ export default function RewardRankingPage() {
                     <Typography className={classes.bigNumber}>{rankData.pool_total
                     }</Typography>
                   </Box>
+
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      mb: "20px"
+                    }}
+                  >
+                    <Typography
+                      variant="body2"
+                      style={{ color: "#888", fontSize: "14px" }}
+                    >
+                      {t("reward.text12")}
+                    </Typography>
+
+                    <Typography
+                      variant="body2"
+                      style={{ color: "#333", fontSize: "14px" }}
+                    >
+                      {balance.account_balance + t("trump")}
+                    </Typography>
+                  </Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Typography
+                      variant="body2"
+                      style={{ color: "#888", fontSize: "14px" }}
+                    >
+                      剩余奖励额度
+                    </Typography>
+
+                    <Typography
+                      variant="body2"
+                      style={{ color: "#A069F6", fontSize: "14px" }}
+                    >
+                      {balance.left_reward_balance + t("trump")}
+                    </Typography>
+                  </Box>
+
                   <Button
                     variant="contained"
                     sx={{
@@ -424,7 +476,7 @@ export default function RewardRankingPage() {
                               color: "#444",
                             }}
                           >
-                            {shortAddress(it.addr)}
+                            {it.user.mail}
                           </Typography>
 
                           <Typography

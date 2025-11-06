@@ -1,40 +1,31 @@
 import { Box, Tabs, Tab, Paper, Typography, Button } from "@mui/material";
 import React, { useState, useEffect, useRef } from "react";
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Pagination } from 'swiper/modules';
+// Import Swiper styles
+import 'swiper/css';
+import 'swiper/css/pagination';
+import '../../style/swiper.css'
 import RewardHeader from "../../components/RewardHeader";
 import { useTranslation } from "react-i18next";
 import { useCurrentDate } from "../../hooks/data";
 import BottomDialog from "../../components/BottomDialog";
 import { useTeamReward } from "../../hooks/useTeamReward";
 import { useUserInfo } from "../../hooks/useUserInfo"; // 假设你有获取用户信息的Hook
-import { usePoolBalance } from "../../hooks/usePoolBalance";
 import { DataLoader } from "../../components/DataLoader";
+import { usePoolBalance } from "../../hooks/usePoolBalance";
 import GlobalSnackbar from "../../components/GlobalSnackbar";
+import { getCurrentDate } from "../../utils/format";
 const Reward = () => {
   const { t } = useTranslation();
   const [tab, setTab] = useState(0);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [value, setValue] = useState(0);
-  const [poolType, setPoolType] = useState(2)
   const [toast, setToast] = useState({ open: false, message: '', type: 'success' });
   // 获取用户信息（包含等级）
   const { userInfo, loading: userLoading } = useUserInfo();
   const userLevel = userInfo?.user_level; // 假设用户信息中包含level字段
-  // 根据选中的Tab决定查询哪个奖池
-  const getPoolTypeByTab = (tabIndex) => {
-    switch (tabIndex) {
-      case 0: return 2; // 大单奖励
-      case 1: return 3; // 永动奖
-      default: return 2;
-    }
-  };
-  const {
-    balance,
-    changePoolType,
-    loading: balanceLoading,
-    error: balanceError,
-    poolTypeName
-  } = usePoolBalance(poolType);
   const {
     rewardData,
     rewardList,
@@ -46,6 +37,7 @@ const Reward = () => {
     refetch,
     getRewardTypeText
   } = useTeamReward("teamUser", 1, 10, userLevel);
+  const { balance, loading: balanceLoading, error: balanceError, refetch: balanceRefetch, changePoolType } = usePoolBalance(2)
   const handleTabChange = (event, newValue) => {
     setTab(newValue);
     let rewardType;
@@ -59,8 +51,11 @@ const Reward = () => {
       default:
         rewardType = "teamUser";
     }
-    setPoolType(getPoolTypeByTab(newValue))
-    changePoolType(getPoolTypeByTab(newValue), userLevel)
+    if (newValue === 0) {
+      changePoolType(2)
+    } else {
+      changePoolType(3, "F9")
+    }
     changeRewardType(rewardType);
   };
 
@@ -69,58 +64,24 @@ const Reward = () => {
   };
 
   const currentDate = useCurrentDate();
-  const staticEarningsData = {
-    total: "18514川普币",
-    dividends: [
-      { id: 1, amount: "0.12345678" },
-      { id: 2, amount: "0.12345678" },
-      { id: 3, amount: "0.12345678" },
-      { id: 4, amount: "0.12345678" },
-      { id: 5, amount: "0.12345678" },
-      { id: 6, amount: "0.12345678" },
-    ],
-  };
-  const contributionData = [
-    {
-      id: 1,
-      type: "质押",
-      amount: "120",
-      coins: "666川普币",
-      date: "2025/11/11",
-    },
-    {
-      id: 2,
-      type: "质押",
-      amount: "120",
-      coins: "666川普币",
-      date: "2025/11/11",
-    },
-    {
-      id: 3,
-      type: "质押",
-      amount: "120",
-      coins: "666川普币",
-      date: "2025/11/11",
-    },
-    {
-      id: 4,
-      type: "质押",
-      amount: "120",
-      coins: "666川普币",
-      date: "2025/11/11",
-    },
-  ];
   const levels = [
-    { label: "F1", icon: "F1.png" },
-    { label: "F2", icon: "F2.png" },
-    { label: "F3", icon: "F3.png" },
-    { label: "F4", icon: "F4.png" },
-    { label: "F5", icon: "F5.png" },
-    { label: "F6", icon: "F6.png" },
-    { label: "F7", icon: "F7.png" },
-    { label: "F8", icon: "F8.png" },
-    { label: "F9", icon: "F9.png" },
+    { level: "F1", color: "linear-gradient(270deg, #8D8D74 0%, #272720 100%)", icon: require("../../static/image/pages/level/F1.png") },
+    { level: "F2", color: "linear-gradient(270deg, #B08564 0%, #4A382A 100%)", icon: require("../../static/image/pages/level/F2.png") },
+    { level: "F3", color: "linear-gradient(270deg, #8D94BB 0%, #404355 100%)", icon: require("../../static/image/pages/level/F3.png") },
+    { level: "F4", color: "linear-gradient(270deg, #E8C97B 0%, #4D3B00 100%)", icon: require("../../static/image/pages/level/F4.png") },
+    { level: "F5", color: "linear-gradient(270deg, #81A3DF 0%, #363C58 100%)", icon: require("../../static/image/pages/level/F5.png") },
+    { level: "F6", color: "linear-gradient(270deg, #6B8CF8 0%, #243A68 100%)", icon: require("../../static/image/pages/level/F6.png") },
+    { level: "F7", color: "linear-gradient(270deg, #A974DF 0%, #491974 100%)", icon: require("../../static/image/pages/level/F7.png") },
+    { level: "F8", color: "linear-gradient(270deg, #9F3085 0%, #4E0D40 100%)", icon: require("../../static/image/pages/level/F8.png") },
+    { level: "F9", color: "linear-gradient(270deg, #7B5711 0%, #5C0922 100%)", icon: require("../../static/image/pages/level/F9.png") },
   ];
+  // 安全处理：当 pool_total_amount 不存在、不是数组或为 0 时 fallback 为空数组，同时默认 account_balance 为 0
+  const poolMap = Object.fromEntries(
+    (Array.isArray(balance?.pool_total_amount) ? balance.pool_total_amount : [])
+      .filter(item => item && typeof item.level_name !== 'undefined')
+      .map(item => [item.level_name, item.account_balance ?? 0])
+  );
+  console.log(balance);
 
   const handleOpenDialog = () => {
     setDialogOpen(true);
@@ -233,8 +194,86 @@ const Reward = () => {
       >
         {rewardData => (<Box>
           {/* Stat card */}
+          {tab === 1 && (
+            <Swiper
+              // slidesPerView={'auto'}
+              // slidesPerView={1}
+              centeredSlides={true}
+              spaceBetween={10}
+              pagination={{
+                clickable: true,
+              }}
+              modules={[Pagination]}
+              className="mySwiper"
+              style={{
+                margin: "0 12px",
+                paddingBottom: "30px", // 给指示器预留空间
+              }}
+            >
+              <DataLoader
+                loading={balanceLoading}
+                error={balanceError}
+                onRetry={balanceRefetch}
+                data={balance}
+                loadingText={`加载中...`}
+                errorText={`加载失败`}
+              >
+                {
+                  levels.map((item, index) => (
+                    <SwiperSlide
+                      key={index}
+                      style={{
+                        width: "100%",
+                        height: "140px",
+                        borderRadius: "16px",
+                        background: item.color,
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        padding: "16px 0",
+                        color: "#fff",
+                      }}
+                    >
+                      {/* 左侧信息 */}
+                      <Box sx={{ display: "flex", flexDirection: "column", gap: "6px", ml: "16px" }}>
+                        <Typography sx={{ fontSize: "18px", fontWeight: "bold", display: "flex", fontStyle: "italic" }}>
+                          <Typography sx={{
+                            fontSize: "14px",
+                            px: "8px", py: "2px",
+                            fontWeight: "600",
+                            bgcolor: "rgba(255, 255, 255, 0.40)",
+                            borderRadius: "4px", mr: "6px"
+                          }}>{item.level} </Typography>
+                          成员等级奖</Typography>
+                        <Typography sx={{ fontSize: "11px", color: "rgba(255, 255, 255, 0.40)" }}>{getCurrentDate()}</Typography>
+                        <Typography sx={{ fontSize: "14px", color: "rgba(255, 255, 255, 0.80)" }}>分红比例：20%</Typography>
+                        <Typography sx={{ fontSize: "28px" }}>
+                          {poolMap[item.account_balance] ?? 0}
+                        </Typography>
+                      </Box>
+
+                      {/* 右侧图标 */}
+                      <Box>
+                        <img
+                          src={item.icon}
+                          alt={item.level}
+                          style={{
+                            width: "120px",
+                            height: "106px",
+                            objectFit: "contain",
+                            filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.2))",
+                          }}
+                        />
+                      </Box>
+                    </SwiperSlide>
+                  ))
+                }
+              </DataLoader>
+            </Swiper>
+          )}
           <Box
             sx={{
+              mt: "12px",
               mx: "12px",
               px: "12px",
               py: "16px",
@@ -249,6 +288,7 @@ const Reward = () => {
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
+                mb: "20px"
               }}
             >
               <Box
@@ -281,102 +321,6 @@ const Reward = () => {
             {/* 中间box */}
             <Box
               sx={{
-                textAlign: "center",
-                bgcolor: "rgba(255, 255, 255, 0.40)",
-                borderRadius: "10px",
-                py: "16px",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center",
-                marginTop: "12px",
-                marginBottom: "16px",
-              }}
-            >
-              {tab === 1 && (
-                <Box sx={{ width: "100%", overflow: "hidden" }}>
-                  <Tabs
-                    value={value}
-                    onChange={handleChange}
-                    variant="scrollable"
-                    scrollButtons="auto"
-                    allowScrollButtonsMobile
-                    aria-label="scrollable auto tabs example"
-                    sx={{
-                      backgroundColor: "#FFF",
-                      borderRadius: "40px",
-                      p: "6px",
-                      minHeight: "44px",
-                      marginBottom: "14px",
-                      "& .MuiTabs-indicator": {
-                        // display: "none", // 隐藏默认的底部指示器
-                        backgroundColor: "rgba(160, 105, 246, 1)"
-                      },
-                      "& .MuiTabs-scrollButtons.Mui-disabled": {
-                        opacity: 0.3
-                      }
-                    }}
-                  >
-                    {levels.map((item) => (
-                      <Tab
-                        key={item.label}
-                        label={item.label}
-                        iconPosition="start"
-                        icon={
-                          <img
-                            src={require(`../../static/image/pages/level/${item.icon}`)}
-                            alt={item.label}
-                            style={{ width: 28, height: 28 }}
-                          />
-                        }
-                        sx={{
-                          minHeight: "36px",
-                          textTransform: "none",
-                          fontSize: "14px",
-                          fontWeight: 500,
-                          "&.Mui-selected": { color: "#7a63ff" },
-                        }}
-                      />
-                    ))}</Tabs>
-                </Box>
-              )}
-              <Typography
-                variant="body2"
-                color="textSecondary"
-                sx={{
-                  color: "#888",
-                  fontSize: "13px",
-                }}
-              >
-                {tab === 0 ? t("reward.text5") : t("reward.text6")}
-              </Typography>
-              <Typography
-                sx={{
-                  bgcolor: "#E8DAFF",
-                  borderRadius: "6px",
-                  color: "#A069F6",
-                  px: "8px",
-                  py: "5px",
-                  width: "72px",
-                  my: "10px",
-                  fontSize: "13px",
-                }}
-              >
-                50%{t("reward.text7")}
-              </Typography>
-              <Typography
-                sx={{
-                  color: "#333",
-                  fontSize: "36px",
-                  fontWeight: "600",
-                }}
-              >
-                {balance.total_amount}
-              </Typography>
-            </Box>
-
-            <Box
-              sx={{
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
@@ -394,7 +338,7 @@ const Reward = () => {
                 variant="body2"
                 style={{ color: "#333", fontSize: "14px" }}
               >
-                {tab === 0 ? rewardData.extra.invite_count + t("reward.text9") : rewardData.extra.level}
+                {tab === 0 ? rewardData.extra.invite_count + t("reward.text9") : userLevel || "无"}
               </Typography>
             </Box>
             <Box
@@ -418,6 +362,28 @@ const Reward = () => {
                 {tab === 0 ? rewardData.extra.can_get_count + t("reward.text11") : rewardData.extra.big_region}
               </Typography>
             </Box>
+            {tab === 1 && (<Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "20px",
+              }}
+            >
+              <Typography
+                variant="body2"
+                style={{ color: "#888", fontSize: "14px" }}
+              >
+                小区贡献值
+              </Typography>
+
+              <Typography
+                variant="body2"
+                style={{ color: "#333", fontSize: "14px" }}
+              >
+                {rewardData.extra.small_region}
+              </Typography>
+            </Box>)}
             <Box
               sx={{
                 display: "flex",
@@ -429,40 +395,39 @@ const Reward = () => {
                 variant="body2"
                 style={{ color: "#888", fontSize: "14px" }}
               >
-                {tab === 0 ? t("reward.text12") : '小区贡献值'}
+                {t("reward.text12")}
               </Typography>
 
               <Typography
                 variant="body2"
                 style={{ color: "#333", fontSize: "14px" }}
               >
-                {tab === 0 ? rewardData.extra.total_amount + t("trump") : rewardData.extra.small_region}
+                {tab === 0 ? balance.account_balance + t("trump") : poolMap[userLevel] + t("trump")}
               </Typography>
             </Box>
-            {tab === 1 && (
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  mt: "20px"
-                }}
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mt: "20px"
+              }}
+            >
+              <Typography
+                variant="body2"
+                style={{ color: "#888", fontSize: "14px" }}
               >
-                <Typography
-                  variant="body2"
-                  style={{ color: "#888", fontSize: "14px" }}
-                >
-                  {'当前可提现数'}
-                </Typography>
+                剩余奖励额度
+              </Typography>
 
-                <Typography
-                  variant="body2"
-                  style={{ color: "#333", fontSize: "14px" }}
-                >
-                  {rewardData.extra.balance + t("trump")}
-                </Typography>
-              </Box>
-            )}
+              <Typography
+                variant="body2"
+                style={{ color: "#A069F6", fontSize: "14px" }}
+              >
+                {balance.left_reward_balance + t("trump")}
+              </Typography>
+            </Box>
+
             <Button
               onClick={handleOpenDialog}
               variant="contained"
@@ -512,7 +477,7 @@ const Reward = () => {
                 </Box>
 
                 {/* <Divider sx={{ mb: 2 }} /> */}
-                {rewardData.list.length > 0 ? (
+                {rewardData?.list?.length > 0 ? (
                   rewardData.list.map((item, index) => (
                     <Box
                       key={item.id}
@@ -523,7 +488,7 @@ const Reward = () => {
                         borderRadius: "12px",
                         p: "16px",
                         alignItems: "center",
-                        mb: index === contributionData.length - 1 ? 0 : "12px",
+                        mb: index === rewardData.list.length - 1 ? 0 : "12px",
                       }}
                     >
                       <Box
@@ -645,7 +610,7 @@ const Reward = () => {
                       borderRadius: "12px",
                       p: "16px",
                       mb:
-                        index === staticEarningsData.dividends.length - 1
+                        index === rewardData.list.length - 1
                           ? 0
                           : "12px",
                     }}

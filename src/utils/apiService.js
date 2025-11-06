@@ -5,13 +5,7 @@ export const apiService = {
   // NFT相关接口
   nft: {
     getList: (data) => axios.post("/api/account/myNftList", data),
-    getDetail: (id) => axios.get(`/nfts/${id}`),
-    transfer: (data) => axios.post("/nfts/transfer", data),
-  },
-
-  // 收益相关接口
-  earnings: {
-    searchReward:(data)=>axios.post("/api/account/poolAmount",data),//查询奖池金额
+    nftIncome: (data) => axios.post("/api/account/incomeList", data), //奖励记录
   },
 
   // 用户相关接口
@@ -27,11 +21,28 @@ export const apiService = {
   },
   rank: {
     bigRankList: (data) => axios.post("/api/account/ranList", data),
-    yongdongRankList: (data) => axios.post("/api/account/ranList", data),
-    newRankList: (data) => axios.post("/api/account/ranList", data),
+    yongdongRankList: (data) =>
+      axios.post("/api/account/yongdongRanList", data),
+    newRankList: (data) => axios.post("/api/account/newUserRanList", data),
   },
-  reward:{
-    teamUser: (data)=> axios.post("/api/user/teamUser", data),
-    teamLevel: (data)=> axios.post("/api/user/teamLevel", data),
-  }
+  reward: {
+    teamUser: (data) => axios.post("/api/user/teamUser", data),
+    teamLevel: (data) => axios.post("/api/user/teamLevel", data),
+  },
+  // 收益相关接口，查询奖池金额
+  earnings: {
+    searchReward: (data) => axios.post("/api/account/poolAmount", data), //查询奖池金额
+  },
+  //可提现余额
+  balance: {
+    withdraw: (data) => axios.post("/api/account/tokenAccount", data),
+  },
+  //奖励记录
+  rewardList: {
+    income: (data) => axios.post("/api/account/incomeList", data),
+  },
+  //提现记录
+  withDraw: {
+    getList: (data) => axios.post("/api/account/withDrawList", data),
+  },
 };

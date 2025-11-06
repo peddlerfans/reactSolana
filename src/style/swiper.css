@@ -1,0 +1,19 @@
+.mySwiper .swiper-pagination {
+  bottom: 5px !important; /* 下移一点 */
+}
+
+.mySwiper .swiper-pagination-bullet {
+  width: 8px;
+  height: 8px;
+  background: rgba(0, 0, 0, 0.2);
+  opacity: 1;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.mySwiper .swiper-pagination-bullet-active {
+  width: 20px !important;
+  height: 5px !important;
+  background: #A069F6 !important;
+  border-radius: 5px !important;
+}

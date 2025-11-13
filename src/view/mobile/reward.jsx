@@ -1,5 +1,6 @@
 import { Box, Tabs, Tab, Paper, Typography, Button } from "@mui/material";
 import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Pagination } from 'swiper/modules';
 // Import Swiper styles
@@ -16,8 +17,10 @@ import { DataLoader } from "../../components/DataLoader";
 import { usePoolBalance } from "../../hooks/usePoolBalance";
 import GlobalSnackbar from "../../components/GlobalSnackbar";
 import { getCurrentDate } from "../../utils/format";
+import LoadMore from "../../components/LoadMore";
 const Reward = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate()
   const [tab, setTab] = useState(0);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
@@ -78,10 +81,18 @@ const Reward = () => {
   // 安全处理：当 pool_total_amount 不存在、不是数组或为 0 时 fallback 为空数组，同时默认 account_balance 为 0
   const poolMap = Object.fromEntries(
     (Array.isArray(balance?.pool_total_amount) ? balance.pool_total_amount : [])
-      .filter(item => item && typeof item.level_name !== 'undefined')
-      .map(item => [item.level_name, item.account_balance ?? 0])
+      .filter(item => item?.level_name)
+      .map(item => {
+        const { level_name, account_balance, f_percent } = item;
+        return [
+          level_name,
+          {
+            amount: Number(account_balance) || 0,
+            f_percent: Number(f_percent) || 0,
+          },
+        ];
+      })
   );
-  console.log(balance);
 
   const handleOpenDialog = () => {
     setDialogOpen(true);
@@ -104,6 +115,10 @@ const Reward = () => {
   const handleInputChange = (event) => {
     setInputValue(event.target.value);
   };
+
+  const goPage = () => {
+    navigate(`/h5/asset?type=${tab + 2}`)
+  }
 
 
   //加载更多
@@ -246,9 +261,9 @@ const Reward = () => {
                           }}>{item.level} </Typography>
                           成员等级奖</Typography>
                         <Typography sx={{ fontSize: "11px", color: "rgba(255, 255, 255, 0.40)" }}>{getCurrentDate()}</Typography>
-                        <Typography sx={{ fontSize: "14px", color: "rgba(255, 255, 255, 0.80)" }}>分红比例：20%</Typography>
+                        <Typography sx={{ fontSize: "14px", color: "rgba(255, 255, 255, 0.80)" }}>{'分红比例:' + (poolMap[item.level]?.f_percent ?? 0) + '%'}</Typography>
                         <Typography sx={{ fontSize: "28px" }}>
-                          {poolMap[item.account_balance] ?? 0}
+                          {poolMap[item.level]?.amount ?? 0}
                         </Typography>
                       </Box>
 
@@ -402,7 +417,7 @@ const Reward = () => {
                 variant="body2"
                 style={{ color: "#333", fontSize: "14px" }}
               >
-                {tab === 0 ? balance.account_balance + t("trump") : poolMap[userLevel] + t("trump")}
+                {tab === 0 ? balance.account_balance + t("trump") : poolMap[userLevel]?.amount + t("trump")}
               </Typography>
             </Box>
             <Box
@@ -471,14 +486,14 @@ const Reward = () => {
                   >
                     {t("reward.text14")}
                   </Typography>
-                  <Typography sx={{ color: "#888", fontSize: "13px" }}>
+                  <Typography sx={{ color: "#888", fontSize: "13px" }} onClick={goPage}>
                     {"转出记录>"}
                   </Typography>
                 </Box>
 
                 {/* <Divider sx={{ mb: 2 }} /> */}
-                {rewardData?.list?.length > 0 ? (
-                  rewardData.list.map((item, index) => (
+                {rewardList?.length > 0 ? (
+                  rewardList.map((item, index) => (
                     <Box
                       key={item.id}
                       sx={{
@@ -488,7 +503,7 @@ const Reward = () => {
                         borderRadius: "12px",
                         p: "16px",
                         alignItems: "center",
-                        mb: index === rewardData.list.length - 1 ? 0 : "12px",
+                        mb: index === rewardList.length - 1 ? 0 : "12px",
                       }}
                     >
                       <Box
@@ -569,7 +584,11 @@ const Reward = () => {
                     </Box>
                   ))
                 ) : (<Box></Box>)}
-
+                <LoadMore
+                  loading={loading}
+                  hasMore={pagination.hasMore}
+                  onLoadMore={loadMore}
+                />
               </Box>
             )}
 
@@ -597,7 +616,7 @@ const Reward = () => {
                   >
                     {t("reward.text14")}
                   </Typography>
-                  <Typography sx={{ color: "#888", fontSize: "13px" }}>
+                  <Typography sx={{ color: "#888", fontSize: "13px" }} onClick={goPage}>
                     {"转出记录>"}
                   </Typography>
                 </Box>
@@ -697,7 +716,11 @@ const Reward = () => {
                     </Box>
                   </Box>
                 ))) : (<Box>暂无数据</Box>)}
-
+                <LoadMore
+                  loading={loading}
+                  hasMore={pagination.hasMore}
+                  onLoadMore={loadMore}
+                />
               </Box>
             )}
           </Box>

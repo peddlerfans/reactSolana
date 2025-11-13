@@ -47,7 +47,7 @@ require("@solana/wallet-adapter-react-ui/styles.css");
 const App: FC = () => {
   return (
     <Context>
-      <Content />
+      {/* <Content /> */}
     </Context>
   );
 };
@@ -55,7 +55,7 @@ const App: FC = () => {
 export default App;
 
 /* ----------------- Context: Connection + Wallet providers ----------------- */
-const Context: FC<{ children: ReactNode }> = ({ children }) => {
+const Context: FC = () => {
   // 网络配置 注意目前是测试网,切换正式网Testnet换成Mainnet
   const network = WalletAdapterNetwork.Testnet;
   // 上线时需要改为：
@@ -91,9 +91,10 @@ const Context: FC<{ children: ReactNode }> = ({ children }) => {
 
   return (
     <ConnectionProvider endpoint={endpoint}> {/* 提供网络连接  连接Solana区块链网络*/}
-      <WalletProvider wallets={wallets} autoConnect> {/* 提供钱包管理  管理钱包连接状态*/}
+      <WalletProvider wallets={wallets} autoConnect={false}> {/* 提供钱包管理  管理钱包连接状态*/}
         <WalletModalProvider>{/* 提供连接弹窗  显示"选择钱包"的弹窗*/}
-          {children}
+          {/* {children} */}
+          <Content />
         </WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>

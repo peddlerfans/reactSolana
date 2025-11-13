@@ -28,14 +28,12 @@ import iconLanguage from '../static/image/menu/lang.png';
 import iconAddress from '../static/image/menu/address.png';
 import iconStatic from '../static/image/menu/static.png';
 import GlobalSnackbar from './GlobalSnackbar';
-const Header: React.FC<{ showWallet?: boolean, address?: string }> = ({ showWallet = true }, { address }) => {
+const Header: React.FC<{ showWallet?: boolean, address?: string }> = ({ showWallet = true, address }) => {
     const [open, setOpen] = React.useState(false);
     const [toast, setToast] = useState({ open: false, message: '', type: 'success' });
     const toggleDrawer = (newOpen: boolean) => () => setOpen(newOpen);
     const navigate = useNavigate();
     const { t } = useTranslation();
-    console.log(address);
-    
     const menuItemsTop = [
         { text: t("drawer.text2"), icon: iconAsset, url: "/h5/asset" },
         { text: t("drawer.text3"), icon: iconReward, url: "/h5/reward" },

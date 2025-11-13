@@ -24,6 +24,7 @@ import { usePoolBalance } from "../../hooks/usePoolBalance";
 import { DataLoader } from "../../components/DataLoader";
 import { useNftList } from "../../hooks/useNftList";
 import { useIncome } from "../../hooks/useIncome";
+import LoadMore from "../../components/LoadMore";
 const useStyles = makeStyles((theme) => ({
   root: {
     minHeight: "100vh",
@@ -129,7 +130,6 @@ export default function NftPage() {
     loadMore: incomeLoadMore,
     refetch: incomeRefetch,
   } = useIncome(7, 1, 10);
-  console.log(nftData);
   const handleTabChange = (event, newValue) => {
     setTab(newValue);
   };
@@ -162,32 +162,10 @@ export default function NftPage() {
     setInputValue(event.target.value);
   };
 
-  const leftData = [
-    {
-      id: 1,
-      name: "名称名称名称名称",
-      address: "GjWWGhX...Rh9d5y3Wstvn58",
-      date: "2026/06/06 11:11"
-    },
-    {
-      id: 2,
-      name: "名称名称名称名称",
-      address: "GjWWGhX...Rh9d5y3Wstvn58",
-      date: "2026/06/06 11:11"
-    },
-    {
-      id: 3,
-      name: "名称名称名称名称",
-      address: "GjWWGhX...Rh9d5y3Wstvn58",
-      date: "2026/06/06 11:11"
-    },
-    {
-      id: 4,
-      name: "名称名称名称名称",
-      address: "GjWWGhX...Rh9d5y3Wstvn58",
-      date: "2026/06/06 11:11"
-    }
-  ]
+  const goPage = () => {
+    navigate(`/h5/asset?type=7`)
+  }
+
   return (
     <Box
       sx={{
@@ -344,7 +322,7 @@ export default function NftPage() {
                 fontSize: "13px",
               }}
             >
-              50%分红
+              {balance?.f_percent+'%'}分红
             </Typography>
             <Typography
               sx={{
@@ -457,7 +435,7 @@ export default function NftPage() {
               转出收益
             </Button>
           </Box>
-          <Typography sx={{ textAlign: "center", color: "#999", fontSize: "13px", mt: "17px" }}>{"转出记录>"}</Typography>
+          <Typography sx={{ textAlign: "center", color: "#999", fontSize: "13px", mt: "17px" }} onClick={goPage}>{"转出记录>"}</Typography>
         </Box>)}
 
       </DataLoader>
@@ -564,7 +542,11 @@ export default function NftPage() {
                   </ListItem>
                 ))}
               </DataLoader>
-
+              <LoadMore
+                loading={nftLoading}
+                hasMore={pagination.hasMore}
+                onLoadMore={loadMore}
+              />
             </List>
           </Paper>
         )}
@@ -603,7 +585,7 @@ export default function NftPage() {
                             fontSize: '13px',
                             bgcolor: 'rgba(160, 105, 246, 0.15)',
                             lineHeight: '20px', textAlign: 'center'
-                          }}>{item.extra_info.my_percent}</Typography>
+                          }}>{Number(item.extra_info.my_percent) * 100 + '%'}</Typography>
                         </Box>
                       </Box>
                       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'start' }}>
@@ -616,7 +598,11 @@ export default function NftPage() {
                 )}
 
               </DataLoader>
-
+              <LoadMore
+                loading={incomeLoading}
+                hasMore={incomePagination.hasMore}
+                onLoadMore={incomeLoadMore}
+              />
             </List>
           </Paper>
         )}

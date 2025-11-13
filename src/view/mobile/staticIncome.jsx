@@ -95,6 +95,10 @@ export default function NftPage() {
     setInputValue(event.target.value);
   };
 
+  const goPage =()=>{
+    navigate("/h5/asset?type=1")
+  }
+
   return (
     <Box
       sx={{
@@ -284,7 +288,10 @@ export default function NftPage() {
         </Box>)}
       </DataLoader>
 
-
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: "28px", mx: "12px" }}>
+        <Typography sx={{ color: "#333", fontSize: "17px" }}>收益明细</Typography>
+        <Typography sx={{ color: "#888", fontSize: "13px" }} onClick={goPage}>{"转出记录>"}</Typography>
+      </Box>
 
       <DataLoader
         loading={incomeLoading}

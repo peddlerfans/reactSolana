@@ -35,9 +35,9 @@ export const usePoolBalance = (poolType, level = null) => {
 
         // 如果是团队等级奖励，需要level参数
         if (type === 3) {
-          if (!userLevel) {
-            throw new Error("查询团队等级奖励需要level参数");
-          }
+          // if (!userLevel) {
+          //   throw new Error("查询团队等级奖励需要level参数");
+          // }
           requestData.level = userLevel;
         }
         const response = await apiService.earnings.searchReward(requestData);

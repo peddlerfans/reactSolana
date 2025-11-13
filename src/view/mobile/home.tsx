@@ -14,13 +14,16 @@ import { useState, useEffect } from 'react';
 import axios from "axios";
 import config from "../../common/config.json"
 import PasswordDialog from '../../components/PasswordDialog';
-import { Box, Typography, Divider, Button, DialogActions } from '@mui/material';
+import { Box, Typography, Divider, Button, DialogActions, TextField } from '@mui/material';
 
 require("./home.css");
 
 const TodoList = () => {
   const [passwordOpen, setPasswordOpen] = useState(false);
   const [password, setPassword] = useState("")
+  const [isEditing, setIsEditing] = useState(false);
+  const [inputValue, setInputValue] = useState("");
+  const [error, setError] = useState("");
   const TETRIS_STATE_SEED = config.TETRIS_STATE_SEED;
   const TETRIS_VAULT_SEED = config.TETRIS_VAULT_SEED;
   const TETRIS_USER_STATE_SEED = config.TETRIS_USER_STATE_SEED;
@@ -129,17 +132,10 @@ const TodoList = () => {
 
   const [tetriSolNum, setTetriSol] = useState<any>('')
 
-  const handleChange = (e: any) => {
-    const value = e.target.value
-    setTetriSol(value)
-    // console.log(tetriSolNum)
-  }
-
   let [referral, getReferral] = useState<any>('')
 
   let [rewards, setReward] = useState<any>('0.00')
 
-  let [isStart, setStart] = useState<any>(false)
 
   // let referralUrl = 'https//www.tetriSol.net/home?referral=' + referral
   // https://tetrisol.net/home
@@ -159,13 +155,6 @@ const TodoList = () => {
     let globalStateKey = await getGlobalStateKey();
     let globalData = await program?.account.globalState.fetch(globalStateKey);
     // console.log(`globalData :`, globalData)
-
-    //判断可以购买的时间
-    if (globalData?.startTime < currentTime) {
-      setStart(true)
-    } else {
-      setStart(false)
-    }
 
     // console.log('startTime', globalData.startTime.toString())
     const now = Date.now();
@@ -423,6 +412,49 @@ ATA就是这个保险箱的地址
     // console.log("componentDidMount");
   }, [wallet])
 
+  // 处理输入框变化
+  const handleInputChange = (event: any) => {
+    const value = event.target.value;
+
+    // 只允许输入数字
+    if (value === "" || /^\d+$/.test(value)) {
+      setInputValue(value);
+      // 实时验证
+      validateInput(value);
+    }
+  };
+
+  // 验证输入
+  const validateInput = (value: string) => {
+    if (!value) {
+      setError("");
+      return;
+    }
+
+    const numValue = parseInt(value);
+
+    if (numValue < 10) {
+      setError(t("minAmountError") || "最小数量为10");
+    } else if (numValue % 10 !== 0) {
+      setError(t("multipleOfTenError") || "必须输入10的倍数");
+    } else {
+      setError("");
+    }
+  };
+
+  // 失去焦点时验证
+  const handleBlur = () => {
+    validateInput(inputValue);
+  };
+
+  // 按钮点击开始输入
+  const handleButtonClick = () => {
+    setIsEditing(true);
+    setInputValue("");
+    setError("");
+  };
+
+
   return (
     <div className="content">
       {/* 标题和标语 */}
@@ -458,20 +490,92 @@ ATA就是这个保险箱的地址
       </Box>
 
       {/* 选择贡献数量标题 */}
-      <Button
-        variant="outlined"
-        fullWidth
-        sx={{
-          py: 1,
-          bgcolor: "#A069F6",
-          borderRadius: "30px",
-          border: "none",
-          color: "#fff",
-          height: "50px"
-        }}
-      >
-        {t("chooseNum")}
-      </Button>
+      {!isEditing ? (
+        // 初始状态 - 按钮
+        <Button
+          variant="outlined"
+          fullWidth
+          onClick={handleButtonClick}
+          sx={{
+            py: 1,
+            bgcolor: "#A069F6",
+            borderRadius: "30px",
+            border: "none",
+            color: "#fff",
+            height: "50px",
+            fontSize: "16px",
+            fontWeight: "bold",
+            "&:hover": {
+              bgcolor: "#8a5cf0",
+              border: "none"
+            }
+          }}
+        >
+          {t("chooseNum")}
+        </Button>
+      ) : (
+        // 编辑状态 - 输入框
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+          <TextField
+            value={inputValue}
+            onChange={handleInputChange}
+            onBlur={handleBlur}
+            placeholder={t("inputPlaceholder") || "请输入贡献数量..."}
+            type="text"
+            inputMode="numeric"
+            fullWidth
+            error={!!error}
+            helperText={error || (t("inputHint") || "提示: 最小10，且为10的倍数")}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "30px",
+                height: "50px",
+                backgroundColor: "transparent",
+
+                // 默认状态边框
+                "& fieldset": {
+                  border: "2px solid #8a5cf0",
+                  borderRadius: "30px",
+                },
+
+                // 悬停状态边框
+                "&:hover fieldset": {
+                  border: "2px solid #A069F6",
+                },
+
+                // 聚焦状态边框
+                "&.Mui-focused fieldset": {
+                  border: "2px solid #A069F6",
+                  boxShadow: "0 0 0 2px rgba(160, 105, 246, 0.1)"
+                },
+
+                // 错误状态边框
+                "&.Mui-error fieldset": {
+                  border: "2px solid #ff4d4f",
+                }
+              },
+
+              "& .MuiOutlinedInput-input": {
+                textAlign: "center",
+                fontSize: "16px",
+                fontWeight: "bold",
+                color: "#fff",
+                padding: "12px 20px",
+                height: "26px"
+              },
+
+              "& .MuiFormHelperText-root": {
+                textAlign: "center",
+                marginTop: "4px",
+                fontSize: "12px",
+                marginLeft: "0",
+                marginRight: "0"
+              }
+            }}
+          />
+        </Box>
+      )}
+
 
       {/* 贡献方式选择 */}
       <DialogActions sx={{ p: 2, gap: 1, padding: "24px 0 0 0 " }}>
@@ -489,21 +593,6 @@ ATA就是这个保险箱的地址
           }}
         >
           {t("walletTransIn")}
-        </Button>
-        <Button
-          onClick={onHatchTetris}
-          variant="contained"
-          fullWidth
-          sx={{
-            py: 1,
-            bgcolor: "#CFF174",
-            borderRadius: "30px",
-            border: "none",
-            color: "#333",
-            height: "50px"
-          }}
-        >
-          {t("hatch")}
         </Button>
       </DialogActions>
 

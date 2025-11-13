@@ -12,15 +12,16 @@ import {
   Button
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import AssignmentIcon from "@material-ui/icons/Assignment";
 import clsx from "clsx";
-import { useNavigate } from "react-router-dom"; // react-router v6
 import RankingTabs from "../../components/PillTab";
 import { useRankList } from "../../hooks/useRankList";
 import { DataLoader } from "../../components/DataLoader";
 import { usePoolBalance } from "../../hooks/usePoolBalance";
+import LoadMore from "../../components/LoadMore";
 // 本地图片导入（替换为你的真实路径）
 import rankImg from "../../static/image/pages/rankImg.png"; // 顶部背景（示例）
 import daoIcon from "../../static/image/pages/dao_avatar.png"; // 中间 DAO 圆形图
@@ -117,19 +118,6 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-// helper to shorten address
-function shortAddress(addr = "", start = 6, end = 4) {
-  if (!addr) return "";
-  if (addr.length <= start + end) return addr;
-  return `${addr.slice(0, start)}...${addr.slice(-end)}`;
-}
-
-const sampleData = Array.from({ length: 10 }).map((_, i) => ({
-  addr: `0xsdsasdasdasdasdas${i}658`,
-  amount: 168,
-  percent: "45%",
-}));
-
 export default function RewardRankingPage() {
   const classes = useStyles();
   const navigate = useNavigate(); // react-router v6
@@ -173,10 +161,10 @@ export default function RewardRankingPage() {
         rankType = "big";
         break;
       case 1:
-        rankType = "yongdong";
+        rankType = "new";
         break;
       case 2:
-        rankType = "new";
+        rankType = "yongdong";
         break;
       default:
         rankType = "big";
@@ -212,26 +200,9 @@ export default function RewardRankingPage() {
 
     return `${h}:${m}:${sec}`;
   };
-
-  //加载更多
-  const loadMoreRef = useRef(null);
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const [entry] = entries;
-        if (entry.isIntersecting && !loading && pagination.hasMore) {
-          loadMore();
-        }
-      },
-      { root: null, rootMargin: "0px", threshold: 0.1 }
-    );
-
-    if (loadMoreRef.current) observer.observe(loadMoreRef.current);
-
-    return () => {
-      if (loadMoreRef.current) observer.unobserve(loadMoreRef.current);
-    };
-  }, [loading, pagination.hasMore, loadMore]);
+  const goPage = () => {
+    navigate(`/h5/asset?type=${selectedTab + 4}`)
+  }
 
 
   return (
@@ -362,7 +333,7 @@ export default function RewardRankingPage() {
                     <Typography variant="body2" color="textSecondary">
                       {labels[selectedTab] ?? labels[0]}
                     </Typography>
-                    <Typography className={classes.percentBadge}>50%{t("rank.text10")}</Typography>
+                    <Typography className={classes.percentBadge}>{balance?.f_percent+'%'}分红</Typography>
                     <Typography className={classes.bigNumber}>{rankData.pool_total
                     }</Typography>
                   </Box>
@@ -426,6 +397,7 @@ export default function RewardRankingPage() {
                   >
                     转入
                   </Button>
+                  <Typography sx={{ textAlign: "center", color: "#999", fontSize: "13px", mt: "17px" }} onClick={goPage}>{"转出记录>"}</Typography>
                 </Box>
               </Box>
 
@@ -505,26 +477,11 @@ export default function RewardRankingPage() {
                       );
                     })}
                     {/* 👇 加载更多观察点 */}
-                    <div
-                      ref={loadMoreRef}
-                      style={{
-                        height: "40px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      {loading && pagination.hasMore && (
-                        <Typography variant="body2" color="textSecondary">
-                          加载中...
-                        </Typography>
-                      )}
-                      {!pagination.hasMore && (
-                        <Typography variant="body2" color="textSecondary">
-                          已加载完全部数据
-                        </Typography>
-                      )}
-                    </div>
+                    {/* <LoadMore
+                      loading={loading}
+                      hasMore={pagination.hasMore}
+                      onLoadMore={loadMore}
+                    /> */}
                   </List>
                   ) : (<Box>暂无数据</Box>)}
 

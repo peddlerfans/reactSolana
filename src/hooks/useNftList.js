@@ -60,7 +60,7 @@ export const useNftList = (
           size,
           total,
           totalPages,
-          hasMore: page < totalPages,
+          hasMore: size === total,
         });
 
         return responseData;

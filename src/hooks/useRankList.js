@@ -50,7 +50,7 @@ export const useRankList = (defaultType = "big", defaultPage = 1, defaultSize = 
         size,
         total,
         totalPages,
-        hasMore: page < totalPages
+        hasMore: size === total
       });
 
       return responseData; // 返回整个data对象

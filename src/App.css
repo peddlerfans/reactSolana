@@ -54,7 +54,7 @@
 /* 判断浏览器大小条件 */
 @media screen and (max-width:760px) {
   .content {
-    width: 96%;
+    /* width: 96%; */
   }
 
   .header {

@@ -47,7 +47,7 @@ export const useIncome = (incomeType, defaultPage = 1, defaultSize = 10) => {
           size,
           total,
           totalPages,
-          hasMore: page < totalPages,
+          hasMore: size === total,
         });
 
         return responseData;

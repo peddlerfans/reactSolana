@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { apiService } from "../utils/apiService";
 
-export const useUserInfo = (type = "in", page = 1, size = 10) => {
+export const useUserInfo = (page = 1, size = 10) => {
   const [userInfo, setUserInfo] = useState(null);
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState({
@@ -34,7 +34,7 @@ export const useUserInfo = (type = "in", page = 1, size = 10) => {
     }
   }, []);
 
-  // 获取记录（支持分页）
+  // 获取转入记录（支持分页）
   const fetchRecords = useCallback(
     async (currentPage = 1, currentSize = size, isLoadMore = false) => {
       try {
@@ -45,24 +45,16 @@ export const useUserInfo = (type = "in", page = 1, size = 10) => {
         }
         setError(null);
 
-        let response;
-        if (type === "in") {
-          response = await apiService.user.transferIn({
-            page: currentPage,
-            size: currentSize,
-          });
-          console.log(response);
-        } else if (type === "out") {
-          response = await apiService.user.transferOut({
-            page: currentPage,
-            size: currentSize,
-          });
-        }
+        // 只获取转入记录
+        const response = await apiService.user.transferIn({
+          page: currentPage,
+          size: currentSize,
+        });
 
         const recordsData = response.data || [];
         const total = response.total || 0;
-        const totalPages = Math.ceil(total / currentSize);
-
+        const totalPages = recordsData.length;
+        
         // 如果是加载更多，就追加数据；否则替换数据
         if (isLoadMore) {
           setRecords((prev) => [...prev, ...recordsData]);
@@ -75,15 +67,11 @@ export const useUserInfo = (type = "in", page = 1, size = 10) => {
           size: currentSize,
           total,
           totalPages,
-          hasMore: currentPage < totalPages,
+          hasMore: currentSize === totalPages,
         });
       } catch (err) {
-        console.log(err);
-
-        setError(
-          err.response?.data?.message ||
-            `获取${type === "in" ? "转入" : "转出"}记录失败`
-        );
+        setError(err.response?.data?.message || "获取转入记录失败");
+        console.error("获取转入记录失败:", err);
       } finally {
         if (isLoadMore) {
           setLoading((prev) => ({ ...prev, more: false }));
@@ -92,7 +80,7 @@ export const useUserInfo = (type = "in", page = 1, size = 10) => {
         }
       }
     },
-    [type, size]
+    [size]
   );
 
   // 加载更多
@@ -134,13 +122,6 @@ export const useUserInfo = (type = "in", page = 1, size = 10) => {
     };
     initData();
   }, []); // 只在组件挂载时执行一次
-
-  // 当type变化时，重新获取记录
-  useEffect(() => {
-    if (type) {
-      fetchRecords(1, size, false);
-    }
-  }, [type, fetchRecords, size]);
 
   return {
     // 数据

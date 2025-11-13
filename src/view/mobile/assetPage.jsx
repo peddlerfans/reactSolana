@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useLocation, useSearchParams } from "react-router-dom";
 import RewardHeader from "../../components/RewardHeader";
 import BottomDialog from "../../components/BottomDialog";
 import {
@@ -14,25 +15,31 @@ import {
 import { useTranslation } from "react-i18next";
 import assetHeader from "../../static/image/pages/assetHeader.png";
 import { useUserInfo } from '../../hooks/useUserInfo';
+import { useWithdrawList } from "../../hooks/useWithdrawList";
 import GlobalSnackbar from "../../components/GlobalSnackbar";
+import LoadMore from "../../components/LoadMore";
+import { DataLoader } from "../../components/DataLoader";
 const RewardPage = () => {
   const { t } = useTranslation();
+  const location = useLocation()
+  const [searchParams] = useSearchParams();
   const [tab, setTab] = useState(0);
+  const [withdrawType, setWithdrawType] = useState(null)
   const [dialogOpen, setDialogOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [toast, setToast] = useState({ open: false, message: '', type: 'success' });
-  const pageSize = 10;
-  // 根据tab决定使用哪个type
-  const getTypeByTab = (tabIndex) => {
-    switch (tabIndex) {
-      case 0: return "in";
-      case 1: return "out";
-      default: return null;
+  useEffect(() => {
+    // update on route change
+    if (location.search) {
+      setTab(1)
+      setWithdrawType(searchParams.get("type"))
+      changeWithdrawType(searchParams.get("type"))
+    } else {
+      setTab(0)
     }
-  };
+  }, [location.search]);
 
-  const type = getTypeByTab(tab);
   const handleTabChange = (event, newValue) => {
     setTab(newValue);
     setCurrentPage(1); // 切换tab时重置页码
@@ -48,8 +55,16 @@ const RewardPage = () => {
     refetchRecords,
     loadMore,
     changePage
-  } = useUserInfo(type, currentPage, pageSize);
-
+  } = useUserInfo(currentPage, 10);
+  const {
+    withdrawData,
+    loading: withdrawLoading,
+    error: withdrawError,
+    pagination: withdrawPagination,
+    changeWithdrawType,
+    loadMore: withdrawLoadMore,
+    refetch: withdrawRefetch,
+  } = useWithdrawList(withdrawType, 1, 10);
   const handleOpenDialog = () => {
     setDialogOpen(true);
   };
@@ -129,73 +144,18 @@ const RewardPage = () => {
       </Box>
     );
   }
-
-  const contributionData = [
-    {
-      id: 1,
-      type: "质押",
-      amount: "120",
-      coins: "666",
-      date: "2025/11/11",
-    },
-    {
-      id: 2,
-      type: "质押",
-      amount: "120",
-      coins: "666",
-      date: "2025/11/11",
-    },
-    {
-      id: 3,
-      type: "质押",
-      amount: "120",
-      coins: "666",
-      date: "2025/11/11",
-    },
-    {
-      id: 4,
-      type: "质押",
-      amount: "120",
-      coins: "666",
-      date: "2025/11/11",
-    },
-  ];
-
-  const withdrawalData = [
-    {
-      id: 1,
-      type: "提现",
-      amount: "-100",
-      fee: "1%",
-      received: "120",
-      date: "2025/11/11",
-    },
-    {
-      id: 2,
-      type: "提现",
-      amount: "-100",
-      fee: "1%",
-      received: "120",
-      date: "2025/11/11",
-    },
-    {
-      id: 3,
-      type: "提现",
-      amount: "-100",
-      fee: "1%",
-      received: "120",
-      date: "2025/11/11",
-    },
-    {
-      id: 4,
-      type: "提现",
-      amount: "-100",
-      fee: "1%",
-      received: "120",
-      date: "2025/11/11",
-    },
-  ];
-
+  const getWithdrawTypeText = (type) => {
+    const typeMap = {
+      1: "静态分红",
+      2: "团队奖励",
+      3: "团队等级奖励",
+      4: "大单奖励",
+      5: "新增奖",
+      6: "永动奖",
+      7: "NFT奖",
+    };
+    return typeMap[type] || "提现记录";
+  };
   return (
     <Box
       sx={{
@@ -389,208 +349,203 @@ const RewardPage = () => {
             <Paper sx={{ borderRadius: 2, boxShadow: "none" }}>
               {/* 表头 */}
               <List sx={{ py: 0 }}>
-                <ListItem sx={{
-                  py: 1
-                }}>
-                  <Box sx={{
-                    display: "flex",
-                    width: "100%",
-                    justifyContent: "space-between"
-                  }}>
-                    <Typography variant="body2" sx={{
-                      fontWeight: "bold",
-                      color: "#333",
-                      width: "25%",
-                      textAlign: "center"
-                    }}>
-                      交易流水号
-                    </Typography>
-                    <Typography variant="body2" sx={{
-                      fontWeight: "bold",
-                      color: "#333",
-                      width: "25%",
-                      textAlign: "center"
-                    }}>
-                      数量
-                    </Typography>
-                    <Typography variant="body2" sx={{
-                      fontWeight: "bold",
-                      color: "#333",
-                      width: "25%",
-                      textAlign: "center"
-                    }}>
-                      系数
-                    </Typography>
-                    <Typography variant="body2" sx={{
-                      fontWeight: "bold",
-                      color: "#333",
-                      width: "25%",
-                      textAlign: "center"
-                    }}>
-                      日期
-                    </Typography>
-                  </Box>
-                </ListItem>
 
                 {/* 数据列表 */}
-                {records.map((item, index) => (
-                  <ListItem
-                    key={item.id}
-                    sx={{
-                      borderBottom: index === records.length - 1
-                        ? "none"
-                        : "1px solid #f0f0f0",
-                      py: 2,
-                    }}
-                  >
-                    <Box sx={{
-                      display: "flex",
-                      width: "100%",
-                      justifyContent: "space-between",
-                      alignItems: "center"
-                    }}>
-                      {/* 交易流水号 */}
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          width: "25%",
-                          textAlign: "center",
-                          color: "#666",
-                          display: "inline-block",
-                          whiteSpace: "pre-line",
-                          wordBreak: "break-word"
-                        }}
-                      >
-                        {item.transaction_no || "川普币"} {/* 根据你的数据结构调整 */}
-                      </Typography>
+                <DataLoader
+                  loading={loading}
+                  error={error}
+                  onRetry={refetch}
+                  data={records}
+                >
+                  {records => (records?.map((item, index) => (
+                    <ListItem
+                      key={item.id}
+                      sx={{
+                        borderBottom: index === records?.length - 1
+                          ? "none"
+                          : "1px solid #f0f0f0",
+                        py: 2,
+                      }}
+                    >
+                      <Box sx={{
+                        display: "flex",
+                        width: "100%",
+                        justifyContent: "space-between",
+                        alignItems: "center"
+                      }}>
+                        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+                          {/* 交易流水号 */}
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              textAlign: "center",
+                              color: "#333",
+                              fontSize: "15px",
+                              mb: "4px"
+                            }}
+                          >
+                            {"TRUMP"} {/* 根据你的数据结构调整 */}
+                          </Typography>
+                          {/* 日期 */}
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              textAlign: "center",
+                              color: "#999",
+                              fontSize: "13px"
+                            }}
+                          >
+                            {item.create_time || "2024-01-01"} {/* 根据你的数据结构调整 */}
+                          </Typography>
+                        </Box>
+                        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
+                          {/* 数量 */}
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              textAlign: "center",
+                              color: "#95BE25",
+                              fontWeight: "bold",
+                              fontSize: "14px",
+                              mb: "4px"
+                            }}
+                          >
+                            {'+' + item.amount}
+                          </Typography>
 
-                      {/* 数量 */}
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          width: "25%",
-                          textAlign: "center",
-                          color: "#444",
-                          fontWeight: "bold"
-                        }}
-                      >
-                        {item.amount}
-                      </Typography>
-
-                      {/* 系数 */}
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          width: "25%",
-                          textAlign: "center",
-                          color: "#666"
-                        }}
-                      >
-                        {item.coefficient || "1.0"} {/* 根据你的数据结构调整 */}
-                      </Typography>
-
-                      {/* 日期 */}
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          width: "25%",
-                          textAlign: "center",
-                          color: "#666"
-                        }}
-                      >
-                        {item.create_time || "2024-01-01"} {/* 根据你的数据结构调整 */}
-                      </Typography>
-                    </Box>
-                  </ListItem>
-                ))}
+                          {/* 系数 */}
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              textAlign: "center",
+                              color: "#666",
+                              fontSize: "13px"
+                            }}
+                          >
+                            {item.coefficient || "1.0"} {/* 根据你的数据结构调整 */}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </ListItem>
+                  )))}
+                </DataLoader>
+                <LoadMore
+                  loading={loading}
+                  hasMore={pagination.hasMore}
+                  onLoadMore={loadMore}
+                />
               </List>
             </Paper>
           )}
 
           {/* 贡献记录 Tab */}
           {tab === 1 && (
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              {contributionData.map((item, index) => (
-                <Paper
-                  key={item.id}
-                  sx={{
-                    boxShadow: "none",
-                    borderRadius: 2,
-                    mb:
-                      index === records.length - 1
-                        ? 0
-                        : "22px",
-                  }}
+            <Paper sx={{ borderRadius: 2, boxShadow: "none" }}>
+              {/* 表头 */}
+              <List sx={{ py: 0 }}>
+                {/* 数据列表 */}
+                <DataLoader
+                  loading={withdrawLoading}
+                  error={withdrawError}
+                  onRetry={withdrawRefetch}
+                  data={withdrawData}
                 >
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Box
+                  {withdrawData => (withdrawData?.map((item, index) => (
+                    <ListItem
+                      key={item.id}
                       sx={{
-                        display: "flex",
-                        alignItems: "center",
+                        borderBottom: index === withdrawData?.length - 1
+                          ? "none"
+                          : "1px solid #f0f0f0",
+                        py: 2,
                       }}
                     >
-                      <img
-                        src={require("../../static/image/pages/pledgeImg.png")}
-                        alt=""
-                        width={26}
-                        height={26}
-                        style={{
-                          marginRight: "10px",
-                        }}
-                      />
-                      <Box>
-                        <Typography
-                          variant="body1"
-                          sx={{
-                            fontWeight: "bold",
-                            mb: 0.5,
-                            fontSize: "14px",
-                            color: "#333",
-                          }}
-                        >
-                          {t("assets.text12")}
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          sx={{ color: "#444", fontSize: "14px" }}
-                        >
-                          {item.coins + t("trump")}
-                        </Typography>
+                      <Box sx={{
+                        display: "flex",
+                        width: "100%",
+                        justifyContent: "space-between",
+                        alignItems: "center"
+                      }}>
+                        <Box sx={{ display: "flex", alignItems: "flex-start", flexDirection: "column" }}>
+                          {/* 转出池 */}
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              color: "#333",
+                              mb: "14px",
+                              fontSize: "15px"
+                            }}
+                          >
+                            {getWithdrawTypeText(item.token)} {/* 根据你的数据结构调整 */}
+                          </Typography>
+                          {/* 手续费 */}
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              textAlign: "center",
+                              color: "#999",
+                              fontSize: "14px"
+                            }}
+                          >
+                            {'手续费' + item.fee} {/* 根据你的数据结构调整 */}
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              textAlign: "center",
+                              color: "#999",
+                              fontSize: "14px"
+                            }}
+                          >
+                            到账
+                          </Typography>
+                        </Box>
+                        <Box sx={{ display: "flex", alignItems: "flex-end", flexDirection: "column" }}>
+                          {/* 日期 */}
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              textAlign: "center",
+                              color: "#999",
+                              fontSize: "13px",
+                              mb: "13px"
+                            }}
+                          >
+                            {item.create_time} {/* 根据你的数据结构调整 */}
+                          </Typography>
+                          {/* 数量 */}
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              textAlign: "center",
+                              color: "#333",
+                              fontSize: "14px"
+                            }}
+                          >
+                            {item.total_amount - item.amount}
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              textAlign: "center",
+                              color: "#95BE25",
+                              fontSize: "14px"
+                            }}
+                          >
+                            {item.amount} {/* 根据你的数据结构调整 */}
+                          </Typography>
+                        </Box>
                       </Box>
-                    </Box>
-
-                    <Box>
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          color: "#95BE25",
-                          textAlign: "end",
-                          fontSize: "14px",
-                        }}
-                      >
-                        {t("assets.text13", { value: item.amount })}
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          color: "#999",
-                          textAlign: "end",
-                          fontSize: "14px",
-                        }}
-                      >
-                        {item.date}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Paper>
-              ))}
-            </Box>
+                    </ListItem>
+                  )))}
+                </DataLoader>
+                <LoadMore
+                  loading={withdrawLoading}
+                  hasMore={withdrawPagination.hasMore}
+                  onLoadMore={withdrawLoadMore}
+                />
+              </List>
+            </Paper>
           )}
         </Box>
       </Box>

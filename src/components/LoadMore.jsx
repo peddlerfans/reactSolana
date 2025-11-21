@@ -1,8 +1,9 @@
 // components/LoadMore.jsx
 import React, { useEffect, useRef } from "react";
 import { Typography } from "@mui/material";
-
+import { useTranslation } from "react-i18next";
 const LoadMore = ({ loading, hasMore, onLoadMore }) => {
+    const {t} =useTranslation()
     const loadMoreRef = useRef(null);
     const hasTriggered = useRef(false);
     useEffect(() => {
@@ -45,12 +46,12 @@ const LoadMore = ({ loading, hasMore, onLoadMore }) => {
         >
             {loading && hasMore && (
                 <Typography variant="body2" color="textSecondary">
-                    加载中...
+                    {t('loading')}
                 </Typography>
             )}
             {!hasMore && (
                 <Typography variant="body2" color="textSecondary">
-                    已加载完全部数据
+                    {t('loadFinish')}
                 </Typography>
             )}
         </div>

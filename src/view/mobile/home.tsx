@@ -1,5 +1,7 @@
 import {
   useAnchorWallet,
+  useConnection,
+  useWallet,
 } from "@solana/wallet-adapter-react";
 import { useTranslation } from 'react-i18next';
 import { TOKEN_PROGRAM_ID, getAssociatedTokenAddress } from '@solana/spl-token';
@@ -8,28 +10,32 @@ import { Program, Provider } from "@project-serum/anchor";
 import idl from "../../idl.json";
 import { apiService } from "../../utils/apiService";
 import * as anchor from "@project-serum/anchor";
-
+import { transferAndSplit } from '../../utils/contract';
 import { useState, useEffect } from 'react';
 // import { publicKey } from "@project-serum/anchor/dist/cjs/utils";
 import axios from "axios";
 import config from "../../common/config.json"
 import PasswordDialog from '../../components/PasswordDialog';
 import { Box, Typography, Divider, Button, DialogActions, TextField } from '@mui/material';
-
+import GlobalSnackbar from '../../components/GlobalSnackbar';
 require("./home.css");
 
 const TodoList = () => {
+  const { connected, publicKey, signTransaction } = useWallet();
+  const { connection } = useConnection();
   const [passwordOpen, setPasswordOpen] = useState(false);
   const [password, setPassword] = useState("")
   const [isEditing, setIsEditing] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const TETRIS_STATE_SEED = config.TETRIS_STATE_SEED;
   const TETRIS_VAULT_SEED = config.TETRIS_VAULT_SEED;
   const TETRIS_USER_STATE_SEED = config.TETRIS_USER_STATE_SEED;
   const TRUMP_MINT = new PublicKey(config.TRUMP_MINT); //川普币Mint地址
   const TRUMP_VAULT_SEED = config.TRUMP_VAULT_SEED // 川普币金库种子
   const network = config.network;
+  const [toast, setToast] = useState({ open: false, message: '', type: 'success' });
   const { t } = useTranslation();
   let wallet = useAnchorWallet();
 
@@ -403,6 +409,67 @@ ATA就是这个保险箱的地址
     }
   }
 
+  const handleTransfer = async () => {
+    if (!connected || !publicKey) {
+       setToast({open:true,message:t("assets.text31"),type:"error"})
+      return;
+    }
+
+    if (!inputValue || Number(inputValue) <= 0) {
+      setToast({open:true,message:t("assets.text32"),type:"error"})
+      return;
+    }
+
+    setLoading(true);
+    try {
+      console.log("开始分发交易...");
+
+      // 1. 创建provider（使用你现有的getProvider）
+      const provider = getProvider();
+      if (!provider) {
+        throw new Error('无法创建provider');
+      }
+
+      // 2. 创建交易
+      const tx = await transferAndSplit(provider, publicKey, Number(inputValue));
+
+      console.log("交易创建成功:", tx);
+
+      // 3. 设置交易费用和区块哈希
+      tx.feePayer = publicKey;
+      const connection = new Connection(network, "processed");
+      tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+
+      // 4. 签名并发送（使用你现有的钱包签名方式）
+      const signedTx = await wallet?.signTransaction(tx);
+      if (!signedTx) {
+        throw new Error('签名交易失败');
+      }
+
+      const txId = await connection.sendRawTransaction(signedTx.serialize());
+      console.log("交易发送成功，ID:", txId);
+
+      // 5. 确认交易（使用你现有的确认方式）
+      await connection.confirmTransaction(txId);
+
+      alert(`转账成功！交易ID: ${txId}`);
+      setInputValue('');
+      setError('');
+
+    } catch (error: any) {
+      console.error('完整的错误信息:', error);
+
+      if (error.message.includes("vec")) {
+        alert('合约IDL格式不兼容，请联系后端更新IDL文件');
+      } else if (error.message.includes("Non-base58")) {
+        alert('地址格式错误，请检查合约配置');
+      } else {
+        alert(`转账失败: ${error.message}`);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
   /**useEffect替代生命周期函数componentDidMount和componentDidUpdate */
   useEffect(() => {
     // getData()
@@ -434,9 +501,9 @@ ATA就是这个保险箱的地址
     const numValue = parseInt(value);
 
     if (numValue < 10) {
-      setError(t("minAmountError") || "最小数量为10");
+      setError(t("assets.text19") || "最小数量为10");
     } else if (numValue % 10 !== 0) {
-      setError(t("multipleOfTenError") || "必须输入10的倍数");
+      setError(t("assets.text20") || "必须输入10的倍数");
     } else {
       setError("");
     }
@@ -520,12 +587,12 @@ ATA就是这个保险箱的地址
             value={inputValue}
             onChange={handleInputChange}
             onBlur={handleBlur}
-            placeholder={t("inputPlaceholder") || "请输入贡献数量..."}
+            placeholder={t("assets.text17") || "请输入贡献数量..."}
             type="text"
             inputMode="numeric"
             fullWidth
             error={!!error}
-            helperText={error || (t("inputHint") || "提示: 最小10，且为10的倍数")}
+            helperText={error || (t("assets.text18") || "提示: 最小10，且为10的倍数")}
             sx={{
               "& .MuiOutlinedInput-root": {
                 borderRadius: "30px",
@@ -569,7 +636,8 @@ ATA就是这个保险箱的地址
                 marginTop: "4px",
                 fontSize: "12px",
                 marginLeft: "0",
-                marginRight: "0"
+                marginRight: "0",
+                color: "#fff",
               }
             }}
           />
@@ -580,7 +648,7 @@ ATA就是这个保险箱的地址
       {/* 贡献方式选择 */}
       <DialogActions sx={{ p: 2, gap: 1, padding: "24px 0 0 0 " }}>
         <Button
-          onClick={onBuyTetris}
+          onClick={handleTransfer}
           variant="outlined"
           fullWidth
           sx={{
@@ -605,6 +673,13 @@ ATA就是这个保险箱的地址
         buttonText={t("confirm")}
         inputPlaceholder={t("inputInviteCode")}
         onInputChange={handlePwdInputChange}
+      />
+
+      <GlobalSnackbar
+        open={toast.open}
+        onClose={() => setToast({ ...toast, open: false })}
+        message={toast.message}
+        severity={toast.type}
       />
     </div>
   );

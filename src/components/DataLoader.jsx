@@ -1,6 +1,8 @@
 // components/DataLoader.jsx
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Box, CircularProgress, Typography, Button, Alert } from '@mui/material';
+// eslint-disable-next-line react-hooks/rules-of-hooks
 
 /**
  * 数据加载组件 - 安全版本
@@ -15,6 +17,7 @@ export const DataLoader = ({
   minHeight = 200,
   onRetry
 }) => {
+  const {t} = useTranslation()
   // 加载状态
   if (loading) {
     return (
@@ -45,7 +48,7 @@ export const DataLoader = ({
                 size="small"
                 onClick={onRetry}
               >
-                重试
+                {t('retry')}
               </Button>
             )
           }
@@ -72,7 +75,7 @@ export const DataLoader = ({
     return (
       <Box sx={{ p: 3 }}>
         <Alert severity="error">
-          组件渲染错误，正在跳转到首页...
+          {t('elementError')}
         </Alert>
       </Box>
     );

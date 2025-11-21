@@ -44,3 +44,16 @@ You don’t have to ever use `eject`. The curated feature set is suitable for sm
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
 To learn React, check out the [React documentation](https://reactjs.org/).
+
+##
+
+// 1. Solana 官方免费节点（你正在用的）
+// const endpoint = "https://api.mainnet-beta.solana.com"; // 主网
+// const endpoint = "https://api.testnet.solana.com"; // 测试网
+
+// // 2. 第三方免费节点
+// const endpoint = "https://solana-mainnet.rpc.extrnode.com";
+
+// // 3. 付费专业节点（推荐用于生产环境）
+// const endpoint = "https://your-project.quiknode.pro/your-token/";
+// const endpoint = "https://solana-mainnet.helius-rpc.com/your-api-key/";

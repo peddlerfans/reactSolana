@@ -10,7 +10,7 @@ export const apiService = {
 
   // 用户相关接口
   user: {
-    login: (data) => axios.post("/api/user/login", data),
+    login: (data) => axios.post("/api/user/mainLogin", data),
     bindInvate: (data) => axios.post("/api/user/bindInvite", data),
     getProfile: () => axios.post("/api/account/accountInfo"),
     transferIn: (data) => axios.post("/api/account/pledgeList", data),
@@ -41,8 +41,9 @@ export const apiService = {
   rewardList: {
     income: (data) => axios.post("/api/account/incomeList", data),
   },
-  //提现记录
+  //提现及记录
   withDraw: {
+    withDraw: (data) => axios.post("/api/account/withDraw", data),
     getList: (data) => axios.post("/api/account/withDrawList", data),
   },
 };

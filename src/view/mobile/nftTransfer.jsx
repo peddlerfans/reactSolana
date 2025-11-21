@@ -3,11 +3,16 @@ import RewardHeader from "../../components/RewardHeader";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListSubheader from "@mui/material/ListSubheader";
+import { useTranslation } from "react-i18next";
 import { useNftList } from "../../hooks/useNftList";
 import { DataLoader } from "../../components/DataLoader";
 import { Box, Typography, Tabs, Tab, Paper } from "@mui/material";
+import { useWithdraw } from "../../hooks/useWithdraw";
+import ConfirmDialog from "../../components/ConfirmDialog";
 export default function NftList() {
+    const { t } = useTranslation()
     const [tab, setTab] = useState(0);
+    const [dialogOpen, setDialogOpen] = useState(false);
     const groupedData = [
         {
             date: "2024/01/15",
@@ -42,15 +47,28 @@ export default function NftList() {
         refetch,
         changeTransactionType
     } = useNftList(1, 10, 1);
-    console.log(nftData);
-
+    const { withdraw } = useWithdraw()
     const handleTabChange = (event, newValue) => {
         setTab(newValue);
         changeTransactionType(newValue + 1)
     };
+    const handleCloseDialog = () => {
+        setDialogOpen(false);
+    };
+    const handleConfirm = async () => {
+        try {
+            const res = await withdraw(7);
+            console.log("成功提现:", res);
+
+            handleCloseDialog();
+            refetch(); // 刷新页面余额
+        } catch (err) {
+            console.error("提现失败:", err);
+        }
+    };
     return (
         <Box sx={{ padding: "0 12px", width: "100%", boxSizing: "border-box" }}>
-            <RewardHeader title="我的记录" />
+            <RewardHeader title={t("nft.text11")} />
             <Tabs
                 value={tab}
                 onChange={handleTabChange}
@@ -67,7 +85,7 @@ export default function NftList() {
                 }}
             >
                 <Tab
-                    label="转入记录"
+                    label={t('nft.text12')}
                     sx={{
                         borderRadius: "20px",
                         minHeight: "32px",
@@ -81,7 +99,7 @@ export default function NftList() {
                     }}
                 />
                 <Tab
-                    label="转出记录"
+                    label={t('nft.text13')}
                     sx={{
                         borderRadius: "20px",
                         minHeight: "32px",
@@ -102,7 +120,7 @@ export default function NftList() {
                     // overflow: "auto",
                     "& ul": { padding: 0 },
                 }}
-                // subheader={<li />}
+            // subheader={<li />}
             >
                 {/* 固定表头 */}
                 <ListSubheader
@@ -134,13 +152,13 @@ export default function NftList() {
                             variant="subtitle2"
                             sx={{ flex: 1, textAlign: "center", fontWeight: "bold" }}
                         >
-                            金额
+                            {t('nft.text13')}
                         </Typography>
                         <Typography
                             variant="subtitle2"
                             sx={{ width: "100px", textAlign: "right", fontWeight: "bold" }}
                         >
-                            日期
+                            {t('nft.text14')}
                         </Typography>
                     </Box>
                 </ListSubheader>
@@ -150,8 +168,8 @@ export default function NftList() {
                     error={error}
                     onRetry={refetch}
                     data={nftData}
-                    loadingText={`加载中...`}
-                    errorText={`加载失败`}
+                    loadingText={t('loading')}
+                    errorText={t('loadError')}
                 >
                     {nftData?.length > 0 ? (
                         nftData.map((item, itemIndex) => (
@@ -193,10 +211,15 @@ export default function NftList() {
                                 </Box>
                             </ListItem>
                         ))
-                    ) : (<Box>暂无数据</Box>)}
+                    ) : (<Box>{t("noData")}</Box>)}
 
                 </DataLoader>
             </List>
+            <ConfirmDialog
+                open={dialogOpen}
+                onClose={handleCloseDialog}
+                onConfirm={handleConfirm}
+            ></ConfirmDialog>
         </Box>
     );
 }

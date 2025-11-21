@@ -17,7 +17,7 @@ import MenuIcon from '@material-ui/icons/Menu';
 import CloseIcon from '@material-ui/icons/Close';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import { useTranslation } from 'react-i18next';
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { BaseWalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import bgi from '../static/image/menu/bgi.png'; // ✅ 背景图
 import iconAsset from '../static/image/menu/asset.png';
 import iconReward from '../static/image/menu/reward.png';
@@ -45,7 +45,7 @@ const Header: React.FC<{ showWallet?: boolean, address?: string }> = ({ showWall
 
     const menuItemsBottom = [
         { text: t("drawer.text7"), icon: iconLanguage, url: "/h5/language" },
-        { text: "切换地址", icon: iconAddress },
+        // { text: "切换地址", icon: iconAddress },
     ];
 
     function navigatePage(data: any) {
@@ -55,6 +55,21 @@ const Header: React.FC<{ showWallet?: boolean, address?: string }> = ({ showWall
             setToast({ open: true, message: "请先链接钱包", type: "error" })
         }
     }
+    // 定义所有需要国际化的标签
+    const labels = {
+        // 连接状态标签
+        'connecting': t('wallet.connecting') || 'Connecting',
+        'connected': t('wallet.connected') || 'Connected',
+        'disconnecting': t('wallet.disconnecting') || 'Disconnecting',
+        'has-wallet': t('wallet.hasWallet') || 'Connect',
+        'no-wallet': t('wallet.noWallet') || 'Select Wallet',
+
+        // 下拉菜单标签
+        'copy-address': t('wallet.copyAddress') || 'Copy address',
+        'copied': t('wallet.copied') || 'Copied',
+        'change-wallet': t('wallet.changeWallet') || 'Change wallet',
+        'disconnect': t('wallet.disconnect') || 'Disconnect'
+    };
 
     const DrawerList = (
         <Box
@@ -156,7 +171,9 @@ const Header: React.FC<{ showWallet?: boolean, address?: string }> = ({ showWall
                 </Box>
 
                 <Box>
-                    {showWallet ? <WalletMultiButton /> : null}
+                    {showWallet ? <BaseWalletMultiButton
+                        labels={labels}
+                    /> : null}
                 </Box>
             </Toolbar>
             <GlobalSnackbar

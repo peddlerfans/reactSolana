@@ -216,7 +216,7 @@ export default function NftPage() {
 
         <img
           src={daoIcon}
-          alt="加载失败"
+          alt={t('nft.text3')}
           width={160}
           height={158}
           style={{
@@ -232,8 +232,8 @@ export default function NftPage() {
         error={error}
         onRetry={refetch}
         data={balance}
-        loadingText={`加载中...`}
-        errorText={`加载失败`}
+        loadingText={t('loading')}
+        errorText={t('nft.text3')}
       >
         {/* Stat card */}
         {balance => (<Box
@@ -308,7 +308,7 @@ export default function NftPage() {
                 fontSize: "13px",
               }}
             >
-              NFT奖金池(川普币)
+              {t("nft.text4")}
             </Typography>
             <Typography
               sx={{
@@ -322,7 +322,7 @@ export default function NftPage() {
                 fontSize: "13px",
               }}
             >
-              {balance?.f_percent+'%'}分红
+              {balance?.f_percent+'%'+t("nft.text5")}
             </Typography>
             <Typography
               sx={{
@@ -368,7 +368,7 @@ export default function NftPage() {
               variant="body2"
               style={{ color: "#888", fontSize: "14px" }}
             >
-              剩余奖励额度
+              {t('assets.text5')}
             </Typography>
 
             <Typography
@@ -392,7 +392,7 @@ export default function NftPage() {
               mb: "11px"
             }}
           >
-            转入
+            {t("transferIn")}
           </Button>
           <Box
             sx={{
@@ -415,7 +415,7 @@ export default function NftPage() {
                 fontSize: '15px'
               }}
             >
-              转出NFT
+              {t("nft.text6")}
             </Button>
 
             <Button
@@ -432,10 +432,10 @@ export default function NftPage() {
                 fontSize: '15px'
               }}
             >
-              转出收益
+              {t('nft.text7')}
             </Button>
           </Box>
-          <Typography sx={{ textAlign: "center", color: "#999", fontSize: "13px", mt: "17px" }} onClick={goPage}>{"转出记录>"}</Typography>
+          <Typography sx={{ textAlign: "center", color: "#999", fontSize: "13px", mt: "17px" }} onClick={goPage}>{t("transferOutList")}</Typography>
         </Box>)}
 
       </DataLoader>
@@ -453,7 +453,7 @@ export default function NftPage() {
         }}
       >
         <Tab
-          label="我的NFT"
+          label={t("nft.text8")}
           sx={{
             minHeight: "32px",
             "&.Mui-selected": {
@@ -465,7 +465,7 @@ export default function NftPage() {
           }}
         />
         <Tab
-          label="DAO联盟治理委员会"
+          label={t('nft.text9')}
           sx={{
             minHeight: "32px",
             "&.Mui-selected": {
@@ -488,8 +488,8 @@ export default function NftPage() {
                 error={nftError}
                 onRetry={nftRefetch}
                 data={nftData}
-                loadingText={`加载中...`}
-                errorText={`加载失败`}
+                loadingText={t("loading")}
+                errorText={t("loadError")}
               >
                 {nftData?.map((item, index) => (
                   <ListItem
@@ -559,8 +559,8 @@ export default function NftPage() {
                 error={incomeError}
                 onRetry={incomeRefetch}
                 data={incomeData}
-                loadingText={`加载中...`}
-                errorText={`加载失败`}
+                loadingText={t("loading")}
+                errorText={t("loadError")}
               >
                 {incomeData => (
                   incomeData.map((item, index) => (
@@ -576,7 +576,7 @@ export default function NftPage() {
                       <Box sx={{ display: 'flex', justifyContent: 'start', alignItems: 'center' }}>
                         <img src={require("../../static/image/pages/nftIcon.png")} alt="" width={20} height={20} />
                         <Box sx={{ ml: "10px" }}>
-                          <Typography sx={{ fontSize: '14px', color: '#333' }} >NFT分红</Typography>
+                          <Typography sx={{ fontSize: '14px', color: '#333' }} >{t("nft.text10")}</Typography>
                           <Typography sx={{
                             width: '40px',
                             height: '20px',

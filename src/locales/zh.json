@@ -13,6 +13,15 @@
     "inputNum": "请输入转出数量",
     "inputInviteCode": "请输入邀请码",
     "trump": "川普币",
+    "loading": "加载中...",
+    "loadError": "加载失败:",
+    "loadagain": "重新加载",
+    "transferIn": "转入",
+    "transferOutList": "转出记录>",
+    "noData": "暂无数据",
+    "retry": "重试",
+    "elementError": "组件渲染错误，正在跳转到首页...",
+    "loadFinish": "已加载完全部数据",
     "drawer": {
         "text1": "我的账户",
         "text2": "资产",
@@ -40,7 +49,23 @@
         "text13": "+获得{{value}}贡献值",
         "text14": "提现{{value}}川普币",
         "text15": "手续费",
-        "text16": "+到账{{value}}川普币"
+        "text16": "+到账{{value}}川普币",
+        "text17": "请输入贡献数量...",
+        "text18": "提示: 最小10，且为10的倍数",
+        "text19": "最小数量为10",
+        "text20": "必须输入10的倍数",
+        "text21": "个人贡献值",
+        "text22": "静态分红",
+        "text23": "团队奖励",
+        "text24": "团队等级奖励",
+        "text25": "大单奖励",
+        "text26": "新增奖",
+        "text27": "永动奖",
+        "text28": "NFT奖",
+        "text29": "手续费",
+        "text30": "到账",
+        "text31": "请先连接钱包",
+        "text32": "请输入有效金额"
     },
     "reward": {
         "text1": "社区奖励",
@@ -57,18 +82,33 @@
         "text12": "可提现奖励",
         "text13": "+贡献{{value}}川普币",
         "text14": "奖励明细",
-        "text15": "+获得{{value}}川普币"
+        "text15": "+获得{{value}}川普币",
+        "text16": "成员等级奖",
+        "text17": "分红比例:",
+        "text18": "当前等级",
+        "text19": "无",
+        "text20": "大区贡献值",
+        "text21": "小区贡献值"
     },
     "nft": {
         "text1": "NFT分红池",
         "text2": "今日分红",
-        "text3": "",
-        "text4": "",
-        "text5": "",
-        "text6": "",
-        "text7": "",
-        "text8": "",
-        "text9": ""
+        "text3": "加载失败",
+        "text4": "NFT奖金池(川普币)",
+        "text5": "分红",
+        "text6": "转出NFT",
+        "text7": "转出收益",
+        "text8": "我的NFT",
+        "text9": "DAO联盟治理委员会",
+        "text10": "NFT分红",
+        "text11": "我的记录",
+        "text12": "转入记录",
+        "text13": "金额",
+        "text14": "日期",
+        "text15": "转出记录",
+        "text16": "转出记录",
+        "text17": "转出记录",
+        "text18": "转出记录"
     },
     "rank": {
         "text1": "全站排行榜",
@@ -80,7 +120,12 @@
         "text7": "大单奖金池(川普币)",
         "text8": "新增奖金池(川普币)",
         "text9": "补偿池(川普币)",
-        "text10": "分红"
+        "text10": "分红",
+        "text11": "名次",
+        "text12": "分红明细",
+        "text13": "日期",
+        "text14": "名次",
+        "text15": "名次"
     },
     "community": {
         "text1": "我的社区",
@@ -93,6 +138,33 @@
         "text8": "枚",
         "text9": "个人贡献值：",
         "text10": "社区贡献值：",
-        "text11": "我的小区"
+        "text11": "我的小区",
+        "text12": "复制成功"
+    },
+    "static": {
+        "text1": "静态分红池",
+        "text2": "您的贡献值:",
+        "text3": "全网个人贡献值总和:",
+        "text4": "收益明细"
+    },
+    "wallet": {
+        "connecting": "连接中",
+        "connected": "已连接",
+        "disconnecting": "断开中",
+        "hasWallet": "连接钱包",
+        "noWallet": "选择钱包",
+        "copyAddress": "复制地址",
+        "copied": "已复制",
+        "changeWallet": "切换钱包",
+        "disconnect": "断开连接",
+        "text1": "选择钱包",
+        "text2": "选择一个钱包来连接（支持 Phantom、Solflare、Trust 等）",
+        "text3": "选择"
+    },
+    "confirmPopup": {
+        "title": "是否确定转入钱包？",
+        "content": "请确认您的操作",
+        "ok": "确定",
+        "cancel": "取消"
     }
 }

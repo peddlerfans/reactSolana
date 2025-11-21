@@ -1,5 +1,5 @@
 // src/App.tsx
-import React, { FC, ReactNode, useMemo, useEffect, useState } from "react";
+import React, { FC, ReactNode, useMemo, useEffect, useState, useCallback } from "react";
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 import {
   ConnectionProvider,
@@ -9,7 +9,7 @@ import {
 import {
   WalletModalProvider
 } from "@solana/wallet-adapter-react-ui";
-
+import CustomWalletModal from "./components/CustomWalletModal";
 import {
   MagicEdenWalletAdapter,
   TokenPocketWalletAdapter,
@@ -23,7 +23,7 @@ import {
   ExodusWalletAdapter,
   TrustWalletAdapter,
 } from "@solana/wallet-adapter-wallets";
-
+import { getWalletAuthData, validateWalletCapabilities } from './utils/walletAuth';
 import { clusterApiUrl } from "@solana/web3.js";
 import { useRoutes, useLocation, useNavigate } from "react-router-dom";
 import routes from "./route/routes";
@@ -36,18 +36,10 @@ require("./App.css");
 require("./style/font.css");
 require("@solana/wallet-adapter-react-ui/styles.css");
 
-// 错误的写法：立即执行函数
-// onClick={handleOpenDialog('outNtf')}   // ❌ 立即执行！
-// onClick={handleOpenDialog('transferOut')} // ❌ 立即执行！
-
-// // 正确的写法：传递函数引用
-// onClick={() => handleOpenDialog('outNtf')}     // ✅
-// onClick={() => handleOpenDialog('transferOut')} // ✅
-
 const App: FC = () => {
   return (
     <Context>
-      {/* <Content /> */}
+      <Content />
     </Context>
   );
 };
@@ -55,46 +47,93 @@ const App: FC = () => {
 export default App;
 
 /* ----------------- Context: Connection + Wallet providers ----------------- */
-const Context: FC = () => {
-  // 网络配置 注意目前是测试网,切换正式网Testnet换成Mainnet
-  const network = WalletAdapterNetwork.Testnet;
-  // 上线时需要改为：
-  // const network = WalletAdapterNetwork.Mainnet; // 主网 - 真钱
+const Context: FC<{ children: ReactNode }> = ({ children }) => {
+  const network = WalletAdapterNetwork.Mainnet;
   const endpoint = useMemo(() => clusterApiUrl(network), [network]);
-  // 1. Solana官方免费节点（你正在用的）
-  // const endpoint = "https://api.mainnet-beta.solana.com"; // 主网
-  // const endpoint = "https://api.testnet.solana.com";     // 测试网
-
-  // // 2. 第三方免费节点
-  // const endpoint = "https://solana-mainnet.rpc.extrnode.com";
-
-  // // 3. 付费专业节点（推荐用于生产环境）
-  // const endpoint = "https://your-project.quiknode.pro/your-token/";
-  // const endpoint = "https://solana-mainnet.helius-rpc.com/your-api-key/";
-  //市场上各种可用钱包的列表
   const wallets = useMemo(
     () => [
-      new PhantomWalletAdapter({ network }),
-      new SolflareWalletAdapter({ network }),
+      new PhantomWalletAdapter(),
+      // new SolflareWalletAdapter(),
       new TrustWalletAdapter(),
       new ExodusWalletAdapter(),
-      new MathWalletAdapter({ network }),
-      new TokenPocketWalletAdapter({ network }),
-      new LedgerWalletAdapter(),
-      new MagicEdenWalletAdapter({ network }),
-      new CoinhubWalletAdapter({ network }),
-      new GlowWalletAdapter({ network }),
-      new SolongWalletAdapter({ network }),
+      // new MathWalletAdapter(),
+      new TokenPocketWalletAdapter(),
+      new MagicEdenWalletAdapter(),
+      new CoinhubWalletAdapter(),
+      new GlowWalletAdapter(),
+      new SolongWalletAdapter(),
     ],
-    [network]
+    [] // 移除 network 依赖，避免不必要的重渲染
   );
 
+  // 钱包状态管理
+  const [walletState, setWalletState] = useState({
+    resetKey: 0,
+    lastConnectedWallet: localStorage.getItem('lastConnectedWallet')
+  });
+
+  const forceResetWallet = () => {
+    // 清除本地存储的钱包信息
+    localStorage.removeItem('lastConnectedWallet');
+    localStorage.removeItem('walletName');
+
+    setWalletState(prev => ({
+      resetKey: prev.resetKey + 1,
+      lastConnectedWallet: null
+    }));
+  };
+
+  // WalletEventHandler runs inside the WalletProvider to observe connect/disconnect/error
+  const WalletEventHandler: FC = () => {
+    const { connected, publicKey, wallet } = useWallet();
+
+    useEffect(() => {
+      if (connected && wallet) {
+        const walletName = (wallet as any)?.adapter?.name || (wallet as any)?.name;
+        console.log('钱包连接成功:', walletName);
+        if (walletName) {
+          localStorage.setItem('lastConnectedWallet', walletName);
+        }
+      } else {
+        console.log('钱包已断开');
+        localStorage.removeItem('lastConnectedWallet');
+        localStorage.removeItem('walletName');
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [connected, publicKey, wallet]);
+
+    useEffect(() => {
+      const adapter = (wallet as any)?.adapter;
+      if (!adapter || typeof adapter.on !== 'function') return;
+      const onError = (err: any) => {
+        console.error('钱包错误:', err);
+        setTimeout(() => {
+          localStorage.removeItem('lastConnectedWallet');
+          localStorage.removeItem('walletName');
+        }, 1000);
+      };
+      adapter.on('error', onError);
+      return () => {
+        adapter.off && adapter.off('error', onError);
+      };
+    }, [wallet]);
+
+    return null;
+  };
+
   return (
-    <ConnectionProvider endpoint={endpoint}> {/* 提供网络连接  连接Solana区块链网络*/}
-      <WalletProvider wallets={wallets} autoConnect={false}> {/* 提供钱包管理  管理钱包连接状态*/}
-        <WalletModalProvider>{/* 提供连接弹窗  显示"选择钱包"的弹窗*/}
-          {/* {children} */}
-          <Content />
+    <ConnectionProvider endpoint={endpoint}>
+      <WalletProvider
+        key={walletState.resetKey}
+        wallets={wallets}
+        autoConnect={false}
+      >
+        <WalletModalProvider>
+          <CustomWalletModal
+            forceResetWallet={forceResetWallet}
+          />
+          <WalletEventHandler />
+          {children}
         </WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>
@@ -103,7 +142,7 @@ const Context: FC = () => {
 
 /* ----------------- Content: routing + header show logic ----------------- */
 const Content: FC = () => {
-  const { connected, publicKey, disconnect } = useWallet();
+  const { connected, publicKey, disconnect, wallet } = useWallet();
   // platform check (mobile vs desktop)
   const plat = navigator.userAgent.match(
     /(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i
@@ -116,7 +155,7 @@ const Content: FC = () => {
   const [locationUrl, changeUrl] = useState(location.pathname);
   const [backgrounImg, setBackgrounImg] = useState("")
   const [backgroundColor, setBackgrounColor] = useState("")
-  const [ address , setAddress ] = useState("")
+  const [address, setAddress] = useState("")
   useEffect(() => {
     // update on route change
     changeUrl(location.pathname);
@@ -163,19 +202,47 @@ const Content: FC = () => {
   // 监听钱包连接状态，连接后自动登录
   useEffect(() => {
     const handleWalletLogin = async () => {
+
       if (connected && publicKey) {
         try {
           const walletAddress = publicKey.toString();
           console.log('钱包已连接，地址:', walletAddress);
           setAddress(walletAddress)
+
+
+          // 验证钱包能力
+          const capabilities = validateWalletCapabilities(wallet);
+          if (!capabilities.signMessage) {
+            alert('当前钱包不支持消息签名，请使用支持的钱包如 Phantom');
+            disconnect();
+            return;
+          }
+
+          // 获取完整的钱包授权信息
+          let authData;
+          try {
+            authData = await getWalletAuthData(
+              publicKey,
+              (wallet?.adapter as any)?.signMessage?.bind(wallet?.adapter),
+              wallet?.adapter.name || 'unknown'
+            );
+            console.log('钱包授权信息获取成功:', authData);
+          } catch (authError) {
+            console.error('获取授权信息失败:', authError);
+            alert('请授权签名以完成登录');
+            disconnect();
+            return;
+          }
+
           // 直接调用登录接口
           const loginResult = await apiService.user.login({
-            mail: "0x95Cd4e05198A73E32453E65507e47fEc4b57f1f9",
+            mail: walletAddress,
+            // mail: "0x95Cd4e05198A73E32453E65507e47fEc4b57f1f9",
             // 如果有签名需求，在这里添加
-            // signature: await getSignature()
+            signature: authData.signature,
+            message: authData.message,
+            publicKey: authData.publicKey
           });
-
-          console.log('登录成功:', loginResult);
 
           // 保存token到localStorage
           if (loginResult.data?.token) {
@@ -220,7 +287,7 @@ const Content: FC = () => {
       }}
     >
       {/* 如果你想 header 在所有页面显示，把 shouldShowHeader() 改为 true */}
-      {shouldShowHeader() ? <Header showWallet={true} address={address}/> : <div></div>}
+      {shouldShowHeader() ? <Header showWallet={true} address={address} /> : <div></div>}
 
       {/* 渲染路由 */}
       {ElementRouter}

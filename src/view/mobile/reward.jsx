@@ -15,16 +15,16 @@ import { useTeamReward } from "../../hooks/useTeamReward";
 import { useUserInfo } from "../../hooks/useUserInfo"; // 假设你有获取用户信息的Hook
 import { DataLoader } from "../../components/DataLoader";
 import { usePoolBalance } from "../../hooks/usePoolBalance";
+import { useWithdraw } from "../../hooks/useWithdraw";
 import GlobalSnackbar from "../../components/GlobalSnackbar";
 import { getCurrentDate } from "../../utils/format";
 import LoadMore from "../../components/LoadMore";
+import ConfirmDialog from "../../components/ConfirmDialog";
 const Reward = () => {
   const { t } = useTranslation();
   const navigate = useNavigate()
   const [tab, setTab] = useState(0);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [inputValue, setInputValue] = useState("");
-  const [value, setValue] = useState(0);
   const [toast, setToast] = useState({ open: false, message: '', type: 'success' });
   // 获取用户信息（包含等级）
   const { userInfo, loading: userLoading } = useUserInfo();
@@ -40,6 +40,7 @@ const Reward = () => {
     refetch,
     getRewardTypeText
   } = useTeamReward("teamUser", 1, 10, userLevel);
+  const { withdraw } = useWithdraw()
   const { balance, loading: balanceLoading, error: balanceError, refetch: balanceRefetch, changePoolType } = usePoolBalance(2)
   const handleTabChange = (event, newValue) => {
     setTab(newValue);
@@ -60,10 +61,6 @@ const Reward = () => {
       changePoolType(3, "F9")
     }
     changeRewardType(rewardType);
-  };
-
-  const handleChange = (event, newValue) => {
-    setValue(newValue);
   };
 
   const currentDate = useCurrentDate();
@@ -101,19 +98,17 @@ const Reward = () => {
     setToast({ open: true, message: '质押成功！', type: 'success' });
     setDialogOpen(false);
   };
-  const handleConfirm = () => {
-    console.log("输入的内容:", inputValue);
-    // 这里处理确定按钮的逻辑
-    handleCloseDialog();
-  };
+  const handleConfirm = async () => {
+    try {
+      const type = tab === 0 ? 2 : userLevel
+      const res = await withdraw(type);
+      console.log("成功提现:", res);
 
-  const handleCancel = () => {
-    // 这里处理取消按钮的逻辑
-    handleCloseDialog();
-  };
-
-  const handleInputChange = (event) => {
-    setInputValue(event.target.value);
+      handleCloseDialog();
+      refetch(); // 刷新页面余额
+    } catch (err) {
+      console.error("提现失败:", err);
+    }
   };
 
   const goPage = () => {
@@ -204,8 +199,8 @@ const Reward = () => {
         error={error}
         onRetry={refetch}
         data={rewardData}
-        loadingText={`加载中...`}
-        errorText={`加载失败`}
+        loadingText={t('loading')}
+        errorText={t('loadError')}
       >
         {rewardData => (<Box>
           {/* Stat card */}
@@ -230,8 +225,8 @@ const Reward = () => {
                 error={balanceError}
                 onRetry={balanceRefetch}
                 data={balance}
-                loadingText={`加载中...`}
-                errorText={`加载失败`}
+                loadingText={t('loading')}
+                errorText={t('loadError')}
               >
                 {
                   levels.map((item, index) => (
@@ -259,9 +254,9 @@ const Reward = () => {
                             bgcolor: "rgba(255, 255, 255, 0.40)",
                             borderRadius: "4px", mr: "6px"
                           }}>{item.level} </Typography>
-                          成员等级奖</Typography>
+                          {t('reward.text16')}</Typography>
                         <Typography sx={{ fontSize: "11px", color: "rgba(255, 255, 255, 0.40)" }}>{getCurrentDate()}</Typography>
-                        <Typography sx={{ fontSize: "14px", color: "rgba(255, 255, 255, 0.80)" }}>{'分红比例:' + (poolMap[item.level]?.f_percent ?? 0) + '%'}</Typography>
+                        <Typography sx={{ fontSize: "14px", color: "rgba(255, 255, 255, 0.80)" }}>{t('rewrd.text17') + (poolMap[item.level]?.f_percent ?? 0) + '%'}</Typography>
                         <Typography sx={{ fontSize: "28px" }}>
                           {poolMap[item.level]?.amount ?? 0}
                         </Typography>
@@ -346,14 +341,14 @@ const Reward = () => {
                 variant="body2"
                 style={{ color: "#888", fontSize: "14px" }}
               >
-                {tab === 0 ? t("reward.text8") : '当前等级'}
+                {tab === 0 ? t("reward.text8") : t('reward.text18')}
               </Typography>
 
               <Typography
                 variant="body2"
                 style={{ color: "#333", fontSize: "14px" }}
               >
-                {tab === 0 ? rewardData.extra.invite_count + t("reward.text9") : userLevel || "无"}
+                {tab === 0 ? rewardData.extra.invite_count + t("reward.text9") : userLevel || t('reward.text19')}
               </Typography>
             </Box>
             <Box
@@ -368,7 +363,7 @@ const Reward = () => {
                 variant="body2"
                 style={{ color: "#888", fontSize: "14px" }}
               >
-                {tab === 0 ? t("reward.text10") : '大区贡献值'}
+                {tab === 0 ? t("reward.text10") : t('reward.text20')}
               </Typography>
               <Typography
                 variant="body2"
@@ -389,7 +384,7 @@ const Reward = () => {
                 variant="body2"
                 style={{ color: "#888", fontSize: "14px" }}
               >
-                小区贡献值
+                {t('reward.text21')}
               </Typography>
 
               <Typography
@@ -432,7 +427,7 @@ const Reward = () => {
                 variant="body2"
                 style={{ color: "#888", fontSize: "14px" }}
               >
-                剩余奖励额度
+                {t('assers.text5')}
               </Typography>
 
               <Typography
@@ -487,7 +482,7 @@ const Reward = () => {
                     {t("reward.text14")}
                   </Typography>
                   <Typography sx={{ color: "#888", fontSize: "13px" }} onClick={goPage}>
-                    {"转出记录>"}
+                    {t('transferOutList')}
                   </Typography>
                 </Box>
 
@@ -530,7 +525,7 @@ const Reward = () => {
                               variant="body1"
                               sx={{ fontSize: "14px", color: "#333" }}
                             >
-                              {item.user_level + '代'}
+                              {item.user_level + t('reward.text11')}
                             </Typography>
                             <Typography
                               variant="body1"
@@ -617,7 +612,7 @@ const Reward = () => {
                     {t("reward.text14")}
                   </Typography>
                   <Typography sx={{ color: "#888", fontSize: "13px" }} onClick={goPage}>
-                    {"转出记录>"}
+                    {t('transferOutList')}
                   </Typography>
                 </Box>
                 {rewardData.list.length > 0 ? (rewardData.list.map((item, index) => (
@@ -715,7 +710,7 @@ const Reward = () => {
                       </Box>
                     </Box>
                   </Box>
-                ))) : (<Box>暂无数据</Box>)}
+                ))) : (<Box>{t('noData')}</Box>)}
                 <LoadMore
                   loading={loading}
                   hasMore={pagination.hasMore}
@@ -733,7 +728,7 @@ const Reward = () => {
         message={toast.message}
         severity={toast.type}
       />
-      <BottomDialog
+      {/* <BottomDialog
         open={dialogOpen}
         onClose={handleCloseDialog}
         title="转出数量选择"
@@ -745,8 +740,14 @@ const Reward = () => {
         cancelText="取消"
         inputLabel="请输入转出数量"
         inputPlaceholder="请输入一些内容..."
-      />
+      /> */}
+      <ConfirmDialog
+        open={dialogOpen}
+        onClose={handleCloseDialog}
+        onConfirm={handleConfirm}
+      >
 
+      </ConfirmDialog>
     </Box >
   );
 };

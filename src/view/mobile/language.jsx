@@ -11,9 +11,9 @@ import i18n from "../../i18n"
 import RewardHeader from "../../components/RewardHeader";
 import cn from "../../static/image/pages/cn.png";
 import en from "../../static/image/pages/en.png";
-import jp from "../../static/image/pages/jp.png";
-import th from "../../static/image/pages/th.png";
-import kr from "../../static/image/pages/kr.png";
+// import jp from "../../static/image/pages/jp.png";
+// import th from "../../static/image/pages/th.png";
+// import kr from "../../static/image/pages/kr.png";
 import selectLanguage from "../../static/image/pages/selectLanguage.png";
 const LanguageSwitch = () => {
   const [lang, setLang] = useState("zh");
@@ -21,9 +21,9 @@ const LanguageSwitch = () => {
   const languages = [
     { label: "中文", value: "zh", icon: cn },
     { label: "English", value: "en", icon: en },
-    { label: "Japanese", value: "ja", icon: jp },
-    { label: "แบบไทย", value: "th", icon: th },
-    { label: "한국인", value: "ko", icon: kr },
+    // { label: "Japanese", value: "ja", icon: jp },
+    // { label: "แบบไทย", value: "th", icon: th },
+    // { label: "한국인", value: "ko", icon: kr },
   ];
 
   useEffect(() => {

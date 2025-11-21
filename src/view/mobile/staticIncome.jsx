@@ -15,13 +15,14 @@ import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import React, { useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import BottomDialog from "../../components/BottomDialog";
 import { makeStyles } from "@material-ui/core/styles";
 import daoIcon from "../../static/image/pages/staticIcon.png";
 import { useCurrentDate } from "../../hooks/data";
 import { usePoolBalance } from "../../hooks/usePoolBalance";
 import { useIncome } from "../../hooks/useIncome";
+import { useWithdraw } from "../../hooks/useWithdraw";
 import { DataLoader } from "../../components/DataLoader";
+import ConfirmDialog from "../../components/ConfirmDialog";
 const useStyles = makeStyles((theme) => ({
   root: {
     minHeight: "100vh",
@@ -50,8 +51,6 @@ export default function NftPage() {
   const { t } = useTranslation();
   const currentDate = useCurrentDate();
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [inputValue, setInputValue] = useState("");
-  const [title, setTitle] = useState("")
   const {
     balance,
     loading,
@@ -65,37 +64,28 @@ export default function NftPage() {
     refetch: incomeRefetch,
     loadMore
   } = useIncome(1)
-
+  const { withdraw, loading: withdrawLoading } = useWithdraw();
   const handleOpenDialog = useCallback((str) => {
-    if (str === 'transferIn') {
-      setTitle("转入NFT");
-    } else if (str === 'outNft') {
-      setTitle("转出NFT");
-    } else {
-      setTitle("转出收益");
-    }
     setDialogOpen(true);
   }, []);
 
   const handleCloseDialog = () => {
     setDialogOpen(false);
   };
-  const handleConfirm = () => {
-    console.log("输入的内容:", inputValue);
-    // 这里处理确定按钮的逻辑
-    handleCloseDialog();
+  const handleConfirm = async () => {
+    try {
+      const res = await withdraw(1);
+      console.log("成功提现:", res);
+
+      handleCloseDialog();
+      refetch(); // 刷新页面余额
+    } catch (err) {
+      console.error("提现失败:", err);
+    }
   };
 
-  const handleCancel = () => {
-    // 这里处理取消按钮的逻辑
-    handleCloseDialog();
-  };
 
-  const handleInputChange = (event) => {
-    setInputValue(event.target.value);
-  };
-
-  const goPage =()=>{
+  const goPage = () => {
     navigate("/h5/asset?type=1")
   }
 
@@ -136,12 +126,12 @@ export default function NftPage() {
             display: "inline-block", // 重要：确保背景裁剪生效
           }}
         >
-          静态分红池
+          {t('static.text1')}
         </Typography>
 
         <img
           src={daoIcon}
-          alt="加载失败"
+          alt={t('loadError')}
           width={158}
           height={158}
           style={{
@@ -218,10 +208,10 @@ export default function NftPage() {
             }}
           >
             <Typography variant="body1" sx={{ fontSize: "14px", color: "#888" }}>
-              您的贡献值：
+              {t('static.text2')}
             </Typography>
             <Typography variant="body1" sx={{ fontSize: "14px", color: "#333" }}>
-              {balance.person_contribution_value + t("trump")}
+              {balance.person_contribution_value}
             </Typography>
           </Box>
           <Box
@@ -233,7 +223,7 @@ export default function NftPage() {
             }}
           >
             <Typography variant="body1" sx={{ fontSize: "14px", color: "#888" }}>
-              全网个人贡献值总和：
+              {t('static.text3')}
             </Typography>
             <Typography variant="body1" sx={{ fontSize: "14px", color: "#333" }}>
               {balance.total_contribution + t("trump")}
@@ -248,7 +238,7 @@ export default function NftPage() {
             }}
           >
             <Typography variant="body1" sx={{ fontSize: "14px", color: "#888" }}>
-              可提现奖励：
+              {t('assets.text3')}
             </Typography>
             <Typography variant="body1" sx={{ fontSize: "14px", color: "#333" }}>
               {balance.account_balance + t("trump")}
@@ -263,7 +253,7 @@ export default function NftPage() {
             }}
           >
             <Typography variant="body1" sx={{ fontSize: "14px", color: "#888" }}>
-              剩余奖励额度：
+              {t('assets.text5')}
             </Typography>
             <Typography variant="body1" sx={{ fontSize: "14px", color: "#A069F6" }}>
               {balance.left_reward_balance + t("trump")}
@@ -283,14 +273,14 @@ export default function NftPage() {
               mb: "11px"
             }}
           >
-            转出
+            {t('assets.text7')}
           </Button>
         </Box>)}
       </DataLoader>
 
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: "28px", mx: "12px" }}>
-        <Typography sx={{ color: "#333", fontSize: "17px" }}>收益明细</Typography>
-        <Typography sx={{ color: "#888", fontSize: "13px" }} onClick={goPage}>{"转出记录>"}</Typography>
+        <Typography sx={{ color: "#333", fontSize: "17px" }}>{t('static.text4')}</Typography>
+        <Typography sx={{ color: "#888", fontSize: "13px" }} onClick={goPage}>{t('transferOutList')}</Typography>
       </Box>
 
       <DataLoader
@@ -329,7 +319,7 @@ export default function NftPage() {
                         ml: "10px",
                       }}
                     >
-                      静态分红
+                      {t('assets.text22')}
                     </Typography>
                   </Box>
 
@@ -351,20 +341,11 @@ export default function NftPage() {
 
         </Box>
       </DataLoader>
-
-
-      <BottomDialog
+      <ConfirmDialog
         open={dialogOpen}
         onClose={handleCloseDialog}
-        title={title}
-        inputValue={inputValue}
-        onInputChange={handleInputChange}
         onConfirm={handleConfirm}
-        onCancel={handleCancel}
-        confirmText={t("confirm")}
-        cancelText={t("cancel")}
-        inputPlaceholder={t("inputNum")}
-      />
+      ></ConfirmDialog>
     </Box>
   );
 }

@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const instance = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'https://djtestapi.youyong.org.cn',
+  baseURL: process.env.REACT_APP_API_URL || 'http://8.137.122.255:8090',
   timeout: 10000,
 });
 

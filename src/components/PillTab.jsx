@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { styled } from "@mui/material/styles";
-import { Tabs, Tab, Box, Typography } from "@mui/material";
+import { Tabs, Tab, Box } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import medal from "../static/image/pages/medal1.png";
 import wingLeft from "../static/image/pages/wing-left.png";

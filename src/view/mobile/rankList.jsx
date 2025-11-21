@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import RewardHeader from "../../components/RewardHeader";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
@@ -6,8 +7,12 @@ import ListSubheader from "@mui/material/ListSubheader";
 import { Box, Typography, Tabs, Tab, Paper } from "@mui/material";
 import { useIncome } from "../../hooks/useIncome";
 import { DataLoader } from "../../components/DataLoader";
+import { useWithdraw } from "../../hooks/useWithdraw";
+import ConfirmDialog from "../../components/ConfirmDialog";
 export default function RankList() {
+  const {t} = useTranslation()
   const [tab, setTab] = useState(0);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const {
     incomeData,
     loading,
@@ -16,38 +21,37 @@ export default function RankList() {
     loadMore,
     changeIncomeType
   } = useIncome(4, 1, 10)
-  const groupedData = [
-    {
-      date: "2024/01/15",
-      items: [
-        { rank: 1, dividend: "+120.50" },
-        { rank: 2, dividend: "+98.75" },
-        { rank: 3, dividend: "+76.30" },
-      ],
-    },
-    {
-      date: "2024/01/14",
-      items: [
-        { rank: 4, dividend: "+65.20" },
-        { rank: 5, dividend: "+54.80" },
-        { rank: 6, dividend: "+43.90" },
-      ],
-    },
-    {
-      date: "2024/01/13",
-      items: [
-        { rank: 7, dividend: "+32.60" },
-        { rank: 8, dividend: "+21.40" },
-      ],
-    },
-  ];
+  const { withdraw } = useWithdraw()
   const handleTabChange = (event, newValue) => {
     setTab(newValue);
     changeIncomeType(newValue + 4)
   };
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
+  };
+
+  const handleConfirm = async () => {
+    try {
+      let type
+      if (tab === 0) {
+        type = 4
+      } else if (tab === 1) {
+        type = 5
+      } else {
+        type = 6
+      }
+      const res = await withdraw(type);
+      console.log("成功提现:", res);
+
+      handleCloseDialog();
+      refetch(); // 刷新页面余额
+    } catch (err) {
+      console.error("提现失败:", err);
+    }
+  };
   return (
     <Box sx={{ padding: "0 12px", width: "100%", boxSizing: "border-box" }}>
-      <RewardHeader title="我的记录" />
+      <RewardHeader title={t('nft.text11')} />
       <Tabs
         value={tab}
         onChange={handleTabChange}
@@ -64,7 +68,7 @@ export default function RankList() {
         }}
       >
         <Tab
-          label="大单榜"
+          label={t('rank.text2')}
           sx={{
             borderRadius: "20px",
             minHeight: "32px",
@@ -78,7 +82,7 @@ export default function RankList() {
           }}
         />
         <Tab
-          label="新增榜"
+          label={t('rank.text3')}
           sx={{
             borderRadius: "20px",
             minHeight: "32px",
@@ -92,7 +96,7 @@ export default function RankList() {
           }}
         />
         <Tab
-          label="永动补偿榜"
+          label={t('rank.text4')}
           sx={{
             borderRadius: "20px",
             minHeight: "32px",
@@ -139,19 +143,19 @@ export default function RankList() {
               variant="subtitle2"
               sx={{ width: "60px", fontWeight: "bold" }}
             >
-              名次
+              {t('rank.text11')}
             </Typography>
             <Typography
               variant="subtitle2"
               sx={{ flex: 1, textAlign: "center", fontWeight: "bold" }}
             >
-              分红明细
+              {t('rank.text12')}
             </Typography>
             <Typography
               variant="subtitle2"
               sx={{ width: "100px", textAlign: "right", fontWeight: "bold" }}
             >
-              日期
+              {t('rank.text13')}
             </Typography>
           </Box>
         </ListSubheader>
@@ -162,8 +166,8 @@ export default function RankList() {
           error={error}
           onRetry={refetch}
           data={incomeData}
-          loadingText={`加载中...`}
-          errorText={`加载失败`}
+          loadingText={t('loading')}
+          errorText={t('loadError')}
         >
           {incomeData => (
             <li>
@@ -213,6 +217,11 @@ export default function RankList() {
         </DataLoader>
 
       </List>
+      <ConfirmDialog
+        open={dialogOpen}
+        onClose={handleCloseDialog}
+        onConfirm={handleConfirm}
+      ></ConfirmDialog>
     </Box>
   );
 }

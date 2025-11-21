@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import RewardHeader from "../../components/RewardHeader";
 import { Box, Typography, Button, IconButton, Paper } from "@mui/material";
 import { useTranslation } from "react-i18next";
@@ -7,39 +7,16 @@ import { DataLoader } from "../../components/DataLoader";
 import { formatAddress } from '../../utils/format';
 import communityBig from "../../static/image/pages/communityBig.png";
 import communitySmall from "../../static/image/pages/communitySmall.png";
+import GlobalSnackbar from "../../components/GlobalSnackbar";
 const MyCommunityPage = () => {
   const { team, loading, error } = useGetMyTeam();
   const { t } = useTranslation()
+  const [toast, setToast] = useState({ open: false, message: '', type: 'success' });
 
   const handleCopy = () => {
     navigator.clipboard.writeText(team.invite_code);
-    alert("邀请码已复制");
+    setToast({open:true,type:'success',msg:t('community.text12')});
   };
-
-  const teamData = [
-    {
-      id: 1,
-      address: "5x2h5f...5142",
-      contribution: "18514",
-      personalValue: "16165.415",
-      communityValue: "65415574.44",
-    },
-    {
-      id: 2,
-      address: "5x2h5f...5142",
-      contribution: "18514",
-      personalValue: "16165.415",
-      communityValue: "65415574.44",
-    },
-    {
-      id: 3,
-      address: "5x2h5f...5142",
-      contribution: "18514",
-      personalValue: "16165.415",
-      communityValue: "65415574.44",
-    },
-  ];
-
   return (
     <Box
       sx={{
@@ -382,6 +359,12 @@ const MyCommunityPage = () => {
           </Box>
         )}
       </DataLoader>
+      <GlobalSnackbar
+        open={toast.open}
+        onClose={() => setToast({ ...toast, open: false })}
+        message={toast.message}
+        severity={toast.type}
+      />
     </Box>
   );
 };

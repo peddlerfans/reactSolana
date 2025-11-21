@@ -250,7 +250,7 @@ export default function RewardRankingPage() {
         <img
           src={daoIcon}
           className={classes.daoAvatar}
-          alt="加载失败"
+          alt={t('loadError')}
           width={180}
           height={146}
           style={{
@@ -282,8 +282,8 @@ export default function RewardRankingPage() {
           error={error}
           onRetry={refetch}
           data={rankData}
-          loadingText={`加载中...`}
-          errorText={`加载失败`}
+          loadingText={t('loading')}
+          errorText={t('loadError')}
         >
           {rankData => (
             <Box sx={{}}>          {/* Stat card */}
@@ -333,7 +333,7 @@ export default function RewardRankingPage() {
                     <Typography variant="body2" color="textSecondary">
                       {labels[selectedTab] ?? labels[0]}
                     </Typography>
-                    <Typography className={classes.percentBadge}>{balance?.f_percent+'%'}分红</Typography>
+                    <Typography className={classes.percentBadge}>{balance?.f_percent+'%'}{t('rank.text10')}</Typography>
                     <Typography className={classes.bigNumber}>{rankData.pool_total
                     }</Typography>
                   </Box>
@@ -371,7 +371,7 @@ export default function RewardRankingPage() {
                       variant="body2"
                       style={{ color: "#888", fontSize: "14px" }}
                     >
-                      剩余奖励额度
+                      {t('assets.text5')}
                     </Typography>
 
                     <Typography
@@ -395,9 +395,9 @@ export default function RewardRankingPage() {
                       mb: "11px"
                     }}
                   >
-                    转入
+                    {t('transferIn')}
                   </Button>
-                  <Typography sx={{ textAlign: "center", color: "#999", fontSize: "13px", mt: "17px" }} onClick={goPage}>{"转出记录>"}</Typography>
+                  <Typography sx={{ textAlign: "center", color: "#999", fontSize: "13px", mt: "17px" }} onClick={goPage}>{t('transferOutList')}</Typography>
                 </Box>
               </Box>
 
@@ -458,7 +458,7 @@ export default function RewardRankingPage() {
                               fontSize: "14px",
                             }}
                           >
-                            {it.amount} 川普币
+                            {it.amount}{t('trump')}
                           </Typography>
 
                           <Typography
@@ -483,7 +483,7 @@ export default function RewardRankingPage() {
                       onLoadMore={loadMore}
                     /> */}
                   </List>
-                  ) : (<Box>暂无数据</Box>)}
+                  ) : (<Box>{t('noData')}</Box>)}
 
               </Box>
             </Box>

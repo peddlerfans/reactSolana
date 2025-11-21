@@ -120,7 +120,7 @@ const RewardPage = () => {
         }}
       >
         <Typography color="error" sx={{ mb: 2 }}>
-          加载失败: {error}
+          {t("loadError")+error}
         </Typography>
         <Button
           onClick={refetchRecords}
@@ -130,7 +130,7 @@ const RewardPage = () => {
             color: "white",
           }}
         >
-          重新加载
+          {t("loadagain")}
         </Button>
       </Box>
     );
@@ -140,19 +140,19 @@ const RewardPage = () => {
   if (loading && tab === 0 && !userInfo) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "200px" }}>
-        <Typography>加载中...</Typography>
+        <Typography>{t("loading")}</Typography>
       </Box>
     );
   }
   const getWithdrawTypeText = (type) => {
     const typeMap = {
-      1: "静态分红",
-      2: "团队奖励",
-      3: "团队等级奖励",
-      4: "大单奖励",
-      5: "新增奖",
-      6: "永动奖",
-      7: "NFT奖",
+      1: t("assets.text22"),
+      2: t("assets.text23"),
+      3: t("assets.text24"),
+      4: t("assets.text25"),
+      5: t("assets.text26"),
+      6: t("assets.text27"),
+      7: t("assets.text28"),
     };
     return typeMap[type] || "提现记录";
   };
@@ -207,7 +207,7 @@ const RewardPage = () => {
           }}
         >
           <Typography variant="body1" sx={{ fontSize: "14px", color: "#888" }}>
-            贡献总数
+            {t('assets.text4')}
           </Typography>
           <Typography variant="body1" sx={{ fontSize: "14px", color: "#333" }}>
             {userInfo.total_pledge_balance}
@@ -222,7 +222,7 @@ const RewardPage = () => {
           }}
         >
           <Typography variant="body1" sx={{ fontSize: "14px", color: "#888" }}>
-            个人贡献值
+            {t("assets.text21")}
           </Typography>
           <Typography variant="body1" sx={{ fontSize: "14px", color: "#333" }}>
             {userInfo.person_contribution_value}
@@ -240,7 +240,7 @@ const RewardPage = () => {
             {t("assets.text3")}
           </Typography>
           <Typography variant="body1" sx={{ fontSize: "14px", color: "#333" }}>
-            {userInfo.balance}川普币
+            {userInfo.balance + t("trump")}
           </Typography>
         </Box>
         <Box
@@ -255,18 +255,7 @@ const RewardPage = () => {
             {t("assets.text5")}
           </Typography>
           <Typography variant="body1" sx={{ fontSize: "14px", color: "#333" }}>
-            {userInfo.left_reward + '川普币'}
-            <Typography
-              component="span"
-              sx={{
-                fontSize: "14px",
-                color: userInfo?.burn_flag ? "#ff4d4f" : "#95BE25",
-                fontWeight: "bold",
-                ml: 0.5
-              }}
-            >
-              {userInfo?.burn_flag ? '/已烧伤' : '/未烧伤'}
-            </Typography>
+            {userInfo.left_reward + t("trump")}
           </Typography>
         </Box>
 
@@ -487,7 +476,7 @@ const RewardPage = () => {
                               fontSize: "14px"
                             }}
                           >
-                            {'手续费' + item.fee} {/* 根据你的数据结构调整 */}
+                            {t("assets.text29") + item.fee} {/* 根据你的数据结构调整 */}
                           </Typography>
                           <Typography
                             variant="body2"
@@ -497,7 +486,7 @@ const RewardPage = () => {
                               fontSize: "14px"
                             }}
                           >
-                            到账
+                            {t("assets.text30")}
                           </Typography>
                         </Box>
                         <Box sx={{ display: "flex", alignItems: "flex-end", flexDirection: "column" }}>

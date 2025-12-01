@@ -15,6 +15,7 @@ import MobileNftPage from "../view/mobile/nftPage";
 import MobileLanguage from "../view/mobile/language";
 import MobileStaticIncome from "../view/mobile/staticIncome";
 import MobileNftTransfer from "../view/mobile/nftTransfer";
+import MobileAirdrop from "../view/mobile/airDropPage";
 const router = [
   // Navigate 重定向
   { path: "/", element: <Navigate to="/home" /> },
@@ -32,6 +33,7 @@ const router = [
   { path: "/h5/language", element: <MobileLanguage /> },
   { path: "/h5/staticIncome", element: <MobileStaticIncome /> },
   { path: "/h5/nftTransfer", element: <MobileNftTransfer/> },
+  { path:"/h5/airdrop", element: <MobileAirdrop/>}
 ];
 
 export default router;

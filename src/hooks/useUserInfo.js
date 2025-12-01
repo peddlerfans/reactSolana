@@ -46,7 +46,7 @@ export const useUserInfo = (page = 1, size = 10) => {
         setError(null);
 
         // 只获取转入记录
-        const response = await apiService.user.transferIn({
+        const response = await apiService.user.transferInList({
           page: currentPage,
           size: currentSize,
         });

@@ -13,7 +13,9 @@ export const apiService = {
     login: (data) => axios.post("/api/user/mainLogin", data),
     bindInvate: (data) => axios.post("/api/user/bindInvite", data),
     getProfile: () => axios.post("/api/account/accountInfo"),
-    transferIn: (data) => axios.post("/api/account/pledgeList", data),
+    transferIn: (data) => axios.post("/api/user/build-deposit", data),
+    setPledge: (data) => axios.post("/api/account/setPledge", data),
+    transferInList: (data) => axios.post("/api/account/pledgeList", data),
     transferOut: (data) => axios.post("/api/account/withDrawList", data),
   },
   team: {
@@ -45,5 +47,10 @@ export const apiService = {
   withDraw: {
     withDraw: (data) => axios.post("/api/account/withDraw", data),
     getList: (data) => axios.post("/api/account/withDrawList", data),
+  },
+  airdrop: {
+    airdropList: (data) => axios.post("/api/user/airdropList", data),
+    setAddress: (data) => axios.post("/api/user/claimAirdrop", data),
+    getList: (data) => axios.post("/api/user/airdropRecord", data),
   },
 };

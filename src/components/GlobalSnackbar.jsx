@@ -5,7 +5,7 @@ export default function GlobalSnackbar({ open, onClose, message, severity = "suc
     return (
         <Snackbar
             open={open}
-            autoHideDuration={2500}
+            autoHideDuration={2000}
             onClose={onClose}
             anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
         >

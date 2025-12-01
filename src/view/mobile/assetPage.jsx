@@ -16,9 +16,10 @@ import { useTranslation } from "react-i18next";
 import assetHeader from "../../static/image/pages/assetHeader.png";
 import { useUserInfo } from '../../hooks/useUserInfo';
 import { useWithdrawList } from "../../hooks/useWithdrawList";
-import GlobalSnackbar from "../../components/GlobalSnackbar";
 import LoadMore from "../../components/LoadMore";
 import { DataLoader } from "../../components/DataLoader";
+import { useWalletReady } from "../../utils/WalletReadyContext";
+import { useUser } from "../../utils/UserContext";
 const RewardPage = () => {
   const { t } = useTranslation();
   const location = useLocation()
@@ -28,7 +29,8 @@ const RewardPage = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [toast, setToast] = useState({ open: false, message: '', type: 'success' });
+  const { isLoggedIn, userInfo: getUserInfo } = useUser(); // 获取登录状态和用户信息
+  const { walletReady } = useWalletReady();
   useEffect(() => {
     // update on route change
     if (location.search) {
@@ -43,6 +45,8 @@ const RewardPage = () => {
   const handleTabChange = (event, newValue) => {
     setTab(newValue);
     setCurrentPage(1); // 切换tab时重置页码
+    console.log();
+
   };
 
   const {
@@ -71,7 +75,6 @@ const RewardPage = () => {
 
   const handleCloseDialog = () => {
     setDialogOpen(false);
-    setToast({ open: true, message: '质押成功！', type: 'success' });
   };
   const handleConfirm = () => {
     console.log("输入的内容:", inputValue);
@@ -88,6 +91,38 @@ const RewardPage = () => {
     setInputValue(event.target.value);
   };
 
+  const getStatus = (status) => {
+    switch (status) {
+      case 0:
+        return t("assets.text34");
+      case 1:
+        return t("assets.text35");
+      case 2:
+        return t("assets.text36");
+      case 3:
+        return t("assets.text34");
+      case 4:
+        return t("assets.text38");
+      default:
+        break;
+    }
+  }
+
+  // 🌟 关键：监听登录状态变化，重新请求数据
+  useEffect(() => {
+    console.log("登录状态变化", {
+      isLoggedIn,
+      hasUserInfo: !!getUserInfo,
+      walletReady
+    });
+
+    if (isLoggedIn && getUserInfo) {
+      console.log("用户已登录，重新请求数据");
+      refetchRecords();
+      withdrawRefetch();
+    }
+  }, [isLoggedIn, getUserInfo]);
+
   // 处理加载状态
   if (loading) {
     return (
@@ -100,7 +135,7 @@ const RewardPage = () => {
           alignItems: "center",
         }}
       >
-        <Typography>加载中...</Typography>
+        <Typography>{t("loading")}</Typography>
       </Box>
     );
   }
@@ -120,7 +155,7 @@ const RewardPage = () => {
         }}
       >
         <Typography color="error" sx={{ mb: 2 }}>
-          {t("loadError")+error}
+          {t("loadError") + error}
         </Typography>
         <Button
           onClick={refetchRecords}
@@ -411,7 +446,7 @@ const RewardPage = () => {
                               fontSize: "13px"
                             }}
                           >
-                            {item.coefficient || "1.0"} {/* 根据你的数据结构调整 */}
+                            {t('assets.text40') + ': ' + (item.coefficient || "1.0")} {/* 根据你的数据结构调整 */}
                           </Typography>
                         </Box>
                       </Box>
@@ -488,6 +523,17 @@ const RewardPage = () => {
                           >
                             {t("assets.text30")}
                           </Typography>
+                          {/* 提现状态 */}
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              textAlign: "center",
+                              color: "#999",
+                              fontSize: "14px"
+                            }}
+                          >
+                            {t("assets.text33")} {/* 根据你的数据结构调整 */}
+                          </Typography>
                         </Box>
                         <Box sx={{ display: "flex", alignItems: "flex-end", flexDirection: "column" }}>
                           {/* 日期 */}
@@ -523,6 +569,18 @@ const RewardPage = () => {
                           >
                             {item.amount} {/* 根据你的数据结构调整 */}
                           </Typography>
+
+                          {/* 状态 */}
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              textAlign: "center",
+                              color: "#333",
+                              fontSize: "14px"
+                            }}
+                          >
+                            {getStatus(item.state)}
+                          </Typography>
                         </Box>
                       </Box>
                     </ListItem>
@@ -550,12 +608,6 @@ const RewardPage = () => {
         cancelText="取消"
         inputLabel="请输入转出数量"
         inputPlaceholder="请输入一些内容..."
-      />
-      <GlobalSnackbar
-        open={toast.open}
-        onClose={() => setToast({ ...toast, open: false })}
-        message={toast.message}
-        severity={toast.type}
       />
     </Box>
   );

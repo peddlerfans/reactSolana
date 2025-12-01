@@ -41,7 +41,7 @@ export const useTeamReward = (
           case "teamLevel":
             // 需要用户等级参数
             if (!userLevel) {
-              throw new Error("需要用户等级信息");
+              // throw new Error("需要用户等级信息");
             }
             response = await apiService.reward.teamLevel({
               ...requestData,
@@ -49,7 +49,7 @@ export const useTeamReward = (
             });
             break;
           default:
-            throw new Error("未知的奖励类型");
+            // throw new Error("未知的奖励类型");
         }
 
         const responseData = response.data;
@@ -83,10 +83,10 @@ export const useTeamReward = (
 
   // 切换奖励类型
   const changeRewardType = useCallback(
-    async (newType) => {
+    async (newType,level) => {
       setType(newType);
       // 切换类型时重置到第一页
-      await fetchRewardData(newType, 1, pagination.size);
+      await fetchRewardData(newType, 1, pagination.size,level);
     },
     [fetchRewardData, pagination.size]
   );

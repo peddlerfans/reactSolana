@@ -23,23 +23,18 @@ export const useWithdraw = () => {
     if (connected && publicKey) {
       return publicKey.toString();
     }
-    throw new Error("请先连接 Solana 钱包");
+    // throw new Error("请先连接 Solana 钱包");
   };
 
   const withdraw = async (type) => {
     setIsWithdrawing(true);
 
     try {
-      const amount = 0;
-      const walletAddress = getWalletAddress();
-      const transaction = await apiService.withDraw.withDraw(
-        walletAddress,
-        type,
-        amount
-      );
+      // const walletAddress = getWalletAddress();
+      const transaction = await apiService.withDraw.withDraw({ type });
 
       console.log("提现成功");
-      return { success: true, transaction };
+      return transaction;
     } catch (error) {
       console.error("提现失败:", error);
       throw error;

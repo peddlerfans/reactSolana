@@ -1,5 +1,5 @@
 {
-    "network": "https://api.devnet.solana.com",
+    "network": "https://devnet.helius-rpc.com/?api-key=7faaa130-4d5c-4b24-b37c-6ff5aaf9accb",
     "TETRIS_STATE_SEED": "TETRIS_STATE_SEED",
     "TETRIS_VAULT_SEED": "TETRIS_VAULT_SEED",
     "TETRIS_USER_STATE_SEED": "TETRIS_USER_STATE_SEED",
@@ -7,6 +7,6 @@
     "TREASURY": "39LQ2WeNKG7WB9GWmdwJvQXjRaKqF2KLDh9RKaMJBCd7",
 
     "USDT_MINT": "42MMC9srt5Ri5X14GAgXhaHiI3GnPAEERYPJgZJDncDU",
-    "TRUMP_MINT": "5e2qRc1DNEXmyxP8qwPwJhRWjef7usLyi7v5xjqLr5G7",
+    "TRUMP_MINT": "FP2i79n4Ar29GRRNCoeBfcwHzwpb5i11qW3oBh5QxgmS",
     "TRUMP_VAULT_SEED": "trump_vault"
 }

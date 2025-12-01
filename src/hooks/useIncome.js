@@ -1,11 +1,14 @@
 // hooks/useIncome.js
 import { useState, useEffect, useCallback } from "react";
 import { apiService } from "../utils/apiService";
-
+import { useSnackbar } from "../utils/SnackbarContext";
+import { useTranslation } from "react-i18next";
 export const useIncome = (incomeType, defaultPage = 1, defaultSize = 10) => {
   const [incomeData, setIncomeData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { showSnackbar } = useSnackbar();
+  const { t } = useTranslation();
   const [pagination, setPagination] = useState({
     page: defaultPage,
     size: defaultSize,
@@ -27,7 +30,8 @@ export const useIncome = (incomeType, defaultPage = 1, defaultSize = 10) => {
 
         // 验证type参数
         if (!type) {
-          throw new Error("查询NFT收益需要type参数");
+          showSnackbar(t("hooks.text1"), "error");
+          // throw new Error("查询NFT收益需要type参数");
         }
 
         const response = await apiService.nft.nftIncome({
@@ -54,7 +58,8 @@ export const useIncome = (incomeType, defaultPage = 1, defaultSize = 10) => {
       } catch (err) {
         const errorMessage = err.response?.data?.message || "获取NFT收益失败";
         setError(errorMessage);
-        console.error("获取NFT收益失败:", err);
+        showSnackbar(t("hooks.text2") + error, "error");
+        // console.error("获取NFT收益失败:", err);
         throw err;
       } finally {
         setLoading(false);

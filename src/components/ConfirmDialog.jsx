@@ -60,13 +60,13 @@ const ConfirmDialog = ({
                 />
 
                 <Typography variant="h6" fontWeight="bold">
-                    {title || t("confirmPopup.title")}
+                    {t("confirmPopup.title")}
                 </Typography>
             </DialogTitle>
 
             <DialogContent sx={{ textAlign: 'center' }}>
                 <Typography variant="body2" color="text.secondary">
-                    {content || t("confirmPopup.content")}
+                    {t("confirmPopup.content")}
                 </Typography>
             </DialogContent>
 
@@ -88,7 +88,7 @@ const ConfirmDialog = ({
                         }
                     }}
                 >
-                    {cancelText || t("confirmPopup.cancel")}
+                    {t("confirmPopup.cancel")}
                 </Button>
 
                 <Button
@@ -116,7 +116,7 @@ const ConfirmDialog = ({
                         />
                     )}
                     <span style={{ opacity: loading ? 0 : 1 }}>
-                        {confirmText || t("confirmPopup.ok")}
+                        {t("confirmPopup.ok")}
                     </span>
                 </Button>
             </DialogActions>

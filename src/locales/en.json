@@ -22,6 +22,15 @@
     "retry": "Retry",
     "elementError": "Component rendering error, redirecting to the homepage...",
     "loadFinish": "All data loaded",
+    "inviter": "Please bind your referrer first",
+    "inviteSuccess": "Binding successful",
+    "message": "Welcome to Fighting DAO! \n\nPlease sign this message to verify your ownership of the wallet.",
+    "990105": "Invalid invitation code, please confirm and try again",
+    "990100": "User does not exist",
+    "990104": "The inviter has been bound and cannot be bound again",
+    "990403": "The business service has not been started, please try again later",
+    "990404": "No contribution record found",
+    "990405": "Abnormal contribution amount record",
     "drawer": {
         "text1": "My Account",
         "text2": "Assets",
@@ -31,7 +40,8 @@
         "text6": "My Community",
         "text7": "Switch Language",
         "text8": "Switch Address",
-        "text9": "Static Income"
+        "text9": "Static Income",
+        "text10": "My airdrop"
     },
     "assets": {
         "text1": "My Assets",
@@ -65,7 +75,15 @@
         "text29": "Transaction fees",
         "text30": "Received",
         "text31": "Please connect your wallet first",
-        "text32": "Please enter a valid amount"
+        "text32": "Please enter a valid amount",
+        "text33": "Withdrawal Status",
+        "text34": "Already on the chain, waiting for confirmation",
+        "text35": "Already on the chain, waiting for confirmation",
+        "text36": "Withdrawal Successful",
+        "text37": "Withdrawal Failed, Awaiting Refund Review",
+        "text38": "Review Approved, Refund Issued",
+        "text39": "Backend Review Failed",
+        "text40": "Coefficient"
     },
     "reward": {
         "text1": "Community Rewards",
@@ -139,7 +157,9 @@
         "text9": "Personal Contribution Value:",
         "text10": "Community Contribution Value:",
         "text11": "My Community",
-        "text12": "Copy Successfully"
+        "text12": "Copy Successfully",
+        "text13": "No team available",
+        "text14": "No invitation code available"
     },
     "static": {
         "text1": "Static Dividend Pool",
@@ -166,5 +186,53 @@
         "content": "Please confirm your action.",
         "ok": "Confirm",
         "cancel": "Cancel"
+    },
+    "sign": {
+        "text1": "Wallet not connected",
+        "text2": "Current wallet does not support transaction signing, please try using another wallet",
+        "text3": "Transaction data not found",
+        "text4": "Wallet does not support any signature method",
+        "text5": "Transaction canceled",
+        "text6": "Solana wallet not detected",
+        "text7": "Failed to retrieve balance:",
+        "text8": "Balance check failed:",
+        "text9": "Transaction successful"
+    },
+    "hooks": {
+        "text1": "NFT earnings query requires type parameter",
+        "text2": "Failed to retrieve NFT earnings:",
+        "text3": "Transaction in progress..."
+    },
+    "withdraw": {
+        "text1": "Submission successful, awaiting block confirmation"
+    },
+    "airdrop": {
+        "text1": "Receive airdrop",
+        "text2": "Countdown ends:",
+        "text3": "Airdrop quantity:",
+        "text4": "Enter airdrop address",
+        "text5": "Please enter the address to receive the airdrop",
+        "text6": "Airdrop coins (units)",
+        "text7": "Airdrop address",
+        "text8": "{{value}} Airdrop Coins Launched with a Bang!",
+        "getListFailed": "Failed to retrieve airdrop list",
+        "claimSuccess": "Successfully claimed",
+        "claimFailed": "Failed to claim airdrop",
+        "alreadyClaimed": "This airdrop has already been claimed",
+        "insufficientBalance": "Insufficient balance",
+        "getRecordsFailed": "Failed to retrieve records"
+    },
+    "error": {
+        "text1": "Transaction block hash has expired. Please re-initiate the transaction.",
+        "text2": "Transaction confirmation failed:",
+        "text3": "Transaction failed. Maximum number of retries reached.",
+        "text4": "Transaction expired. Please try again.",
+        "text5": "Insufficient SOL balance. Please ensure you have enough SOL in your wallet to pay network fees.",
+        "text6": "Missing necessary trading parameters",
+        "text7": "Trading interface returned empty data",
+        "text8": "Trading data format error",
+        "text9": "Insufficient withdrawable amount",
+        "text10": "Insufficient remaining reward amount",
+        "text11": "Insufficient token balance"
     }
 }

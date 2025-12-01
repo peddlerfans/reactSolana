@@ -8,6 +8,7 @@ import {
   Radio,
 } from "@mui/material";
 import i18n from "../../i18n"
+import { useTranslation } from "react-i18next";
 import RewardHeader from "../../components/RewardHeader";
 import cn from "../../static/image/pages/cn.png";
 import en from "../../static/image/pages/en.png";
@@ -17,7 +18,7 @@ import en from "../../static/image/pages/en.png";
 import selectLanguage from "../../static/image/pages/selectLanguage.png";
 const LanguageSwitch = () => {
   const [lang, setLang] = useState("zh");
-
+  const { t } = useTranslation()
   const languages = [
     { label: "中文", value: "zh", icon: cn },
     { label: "English", value: "en", icon: en },
@@ -30,7 +31,7 @@ const LanguageSwitch = () => {
     const stored = localStorage.getItem("i18nextLng");
     if (stored) setLang(stored);
     console.log(stored);
-    
+
   }, []);
 
   const handleSelect = (value) => {
@@ -52,7 +53,7 @@ const LanguageSwitch = () => {
       }}
     >
       {/* 顶部导航 */}
-      <RewardHeader title="切换语言" />
+      <RewardHeader title={t("drawer.text7")} />
       {/* 内容区域 */}
       <Box
         sx={{

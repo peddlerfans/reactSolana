@@ -1,6 +1,6 @@
 // src/utils/walletAuth.ts
 import { PublicKey } from '@solana/web3.js';
-
+import i18n from 'i18next';
 export interface WalletAuthData {
     publicKey: string;
     signature: string;
@@ -10,7 +10,6 @@ export interface WalletAuthData {
     timestamp: number;
     network: string;
 }
-
 /**
  * 获取完整的钱包授权信息
  */
@@ -18,13 +17,13 @@ export const getWalletAuthData = async (
     publicKey: PublicKey,
     signMessage: any,
     walletName: string
-): Promise<WalletAuthData> => {
+): Promise<WalletAuthData> => {   
     try {
+        // 创建唯一的登录消息
         // 创建唯一的登录消息
         const timestamp = Date.now();
         const nonce = Math.random().toString(36).substring(2, 15);
-        const message = `Welcome to Fighting DAO!\n\nPlease sign this message to verify your ownership of the wallet.\n\nWallet: ${publicKey.toString()}\nTimestamp: ${timestamp}\nWarn: ${nonce}\nNetwork: mainnet`;
-
+        const message = `${i18n.t('message')}\n\nWallet: ${publicKey.toString()}\nTimestamp: ${timestamp}\nWarn: ${nonce}\nNetwork: mainnet`;
         let signature: string;
         let signedMessage: string;
 

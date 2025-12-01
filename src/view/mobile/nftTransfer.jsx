@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState ,useEffect} from "react";
 import RewardHeader from "../../components/RewardHeader";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
@@ -7,37 +7,14 @@ import { useTranslation } from "react-i18next";
 import { useNftList } from "../../hooks/useNftList";
 import { DataLoader } from "../../components/DataLoader";
 import { Box, Typography, Tabs, Tab, Paper } from "@mui/material";
-import { useWithdraw } from "../../hooks/useWithdraw";
-import ConfirmDialog from "../../components/ConfirmDialog";
+import { useWalletReady } from "../../utils/WalletReadyContext";
+import { useUser } from "../../utils/UserContext";
+
 export default function NftList() {
-    const { t } = useTranslation()
+    const { t } = useTranslation();
     const [tab, setTab] = useState(0);
-    const [dialogOpen, setDialogOpen] = useState(false);
-    const groupedData = [
-        {
-            date: "2024/01/15",
-            items: [
-                { rank: 1, dividend: "+120.50" },
-                { rank: 2, dividend: "+98.75" },
-                { rank: 3, dividend: "+76.30" },
-            ],
-        },
-        {
-            date: "2024/01/14",
-            items: [
-                { rank: 4, dividend: "+65.20" },
-                { rank: 5, dividend: "+54.80" },
-                { rank: 6, dividend: "+43.90" },
-            ],
-        },
-        {
-            date: "2024/01/13",
-            items: [
-                { rank: 7, dividend: "+32.60" },
-                { rank: 8, dividend: "+21.40" },
-            ],
-        },
-    ];
+    const { isLoggedIn, userInfo } = useUser(); // 获取登录状态和用户信息
+    const { walletReady } = useWalletReady();
     const {
         nftData,
         loading,
@@ -47,25 +24,25 @@ export default function NftList() {
         refetch,
         changeTransactionType
     } = useNftList(1, 10, 1);
-    const { withdraw } = useWithdraw()
     const handleTabChange = (event, newValue) => {
         setTab(newValue);
         changeTransactionType(newValue + 1)
     };
-    const handleCloseDialog = () => {
-        setDialogOpen(false);
-    };
-    const handleConfirm = async () => {
-        try {
-            const res = await withdraw(7);
-            console.log("成功提现:", res);
 
-            handleCloseDialog();
-            refetch(); // 刷新页面余额
-        } catch (err) {
-            console.error("提现失败:", err);
+      // 🌟 关键：监听登录状态变化，重新请求数据
+      useEffect(() => {
+        console.log("登录状态变化", {
+          isLoggedIn,
+          hasUserInfo: !!userInfo,
+          walletReady
+        });
+    
+        if (isLoggedIn && userInfo) {
+          console.log(" 用户已登录，重新请求数据");
+          refetch();
         }
-    };
+      }, [isLoggedIn, userInfo]);
+
     return (
         <Box sx={{ padding: "0 12px", width: "100%", boxSizing: "border-box" }}>
             <RewardHeader title={t("nft.text11")} />
@@ -215,11 +192,7 @@ export default function NftList() {
 
                 </DataLoader>
             </List>
-            <ConfirmDialog
-                open={dialogOpen}
-                onClose={handleCloseDialog}
-                onConfirm={handleConfirm}
-            ></ConfirmDialog>
+
         </Box>
     );
 }

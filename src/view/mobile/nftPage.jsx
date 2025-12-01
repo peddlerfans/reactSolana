@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import AssignmentIcon from "@material-ui/icons/Assignment";
-import React, { useState, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import BottomDialog from "../../components/BottomDialog";
@@ -24,7 +24,14 @@ import { usePoolBalance } from "../../hooks/usePoolBalance";
 import { DataLoader } from "../../components/DataLoader";
 import { useNftList } from "../../hooks/useNftList";
 import { useIncome } from "../../hooks/useIncome";
+import { useWithdraw } from "../../hooks/useWithdraw";
+import ConfirmDialog from "../../components/ConfirmDialog";
+import { useSnackbar } from "../../utils/SnackbarContext";
+import { useLoading } from "../../utils/LoadingContext";
 import LoadMore from "../../components/LoadMore";
+import { useWalletReady } from "../../utils/WalletReadyContext";
+import { useUser } from "../../utils/UserContext";
+import { formatAddress } from '../../utils/format';
 const useStyles = makeStyles((theme) => ({
   root: {
     minHeight: "100vh",
@@ -102,10 +109,13 @@ export default function NftPage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const currentDate = useCurrentDate();
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [inputValue, setInputValue] = useState("");
-  const [title, setTitle] = useState("")
   const [tab, setTab] = useState(0);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const { showSnackbar } = useSnackbar();
+  const { showLoading, hideLoading } = useLoading();
+  const { withdraw } = useWithdraw()
+  const { isLoggedIn, userInfo } = useUser(); // 获取登录状态和用户信息
+  const { walletReady } = useWalletReady();
   const {
     balance,
     loading,
@@ -130,36 +140,58 @@ export default function NftPage() {
     loadMore: incomeLoadMore,
     refetch: incomeRefetch,
   } = useIncome(7, 1, 10);
+
+  useEffect(() => {
+    console.log("NFT页面: 登录状态变化", {
+      isLoggedIn,
+      hasUserInfo: !!userInfo,
+      walletReady
+    });
+
+    if (isLoggedIn && userInfo) {
+      console.log("NFT页面: 用户已登录，重新请求数据");
+      refetch();
+      nftRefetch()
+      incomeRefetch();
+    }
+  }, [isLoggedIn, userInfo]);
+
   const handleTabChange = (event, newValue) => {
     setTab(newValue);
   };
-  const handleOpenDialog = useCallback((str) => {
-    if (str === 'transferIn') {
-      setTitle("转入NFT");
-    } else if (str === 'outNft') {
-      setTitle("转出NFT");
-    } else {
-      setTitle("转出收益");
+  const handleOpen = () => {
+    if (!Number(balance.account_balance)) {
+      showSnackbar(t("error.text9"), 'error')
+      return
     }
-    setDialogOpen(true);
-  }, []);
-
+    if (!Number(balance.left_reward_balance)) {
+      showSnackbar(t("error.text10"), 'error')
+      return
+    }
+    setDialogOpen(true)
+  }
   const handleCloseDialog = () => {
     setDialogOpen(false);
   };
-  const handleConfirm = () => {
-    console.log("输入的内容:", inputValue);
-    // 这里处理确定按钮的逻辑
-    handleCloseDialog();
-  };
-
-  const handleCancel = () => {
-    // 这里处理取消按钮的逻辑
-    handleCloseDialog();
-  };
-
-  const handleInputChange = (event) => {
-    setInputValue(event.target.value);
+  const handleConfirm = async () => {
+    showLoading(t('hooks.text3'));
+    try {
+      const res = await withdraw('7');
+      console.log("成功提现:", res);
+      if (res.code === 200) {
+        showSnackbar(t('withdraw.text1'), 'success')
+      } else {
+        showSnackbar(res.msg, 'error')
+      }
+      handleCloseDialog();
+      refetch(); // 刷新页面余额
+      nftRefetch();
+      incomeRefetch()
+    } catch (err) {
+      console.error("提现失败:", err);
+    } finally {
+      hideLoading()
+    }
   };
 
   const goPage = () => {
@@ -184,14 +216,14 @@ export default function NftPage() {
           <IconButton edge="start" onClick={() => navigate(-1)}>
             <ArrowBackIcon />
           </IconButton>
-          <IconButton
+          {/* <IconButton
             style={{ color: "#333" }}
             onClick={() => {
               navigate("/h5/nftTransfer");
             }}
           >
             <AssignmentIcon />
-          </IconButton>
+          </IconButton> */}
         </Toolbar>
       </AppBar>
 
@@ -322,7 +354,7 @@ export default function NftPage() {
                 fontSize: "13px",
               }}
             >
-              {balance?.f_percent+'%'+t("nft.text5")}
+              {balance?.f_percent + '%' + t("nft.text5")}
             </Typography>
             <Typography
               sx={{
@@ -379,22 +411,22 @@ export default function NftPage() {
             </Typography>
           </Box>
           <Button
-            onClick={() => handleOpenDialog('transferIn')}
+            onClick={() => handleOpen()}
             variant="contained"
             sx={{
               width: "100%",
               mt: "20px",
-              bgcolor: "#A069F6",
-              color: "#FFF",
+              bgcolor: "#CFF174",
+              color: "#333",
               fontWeight: "bold",
               borderRadius: "30px",
               boxShadow: "none",
               mb: "11px"
             }}
           >
-            {t("transferIn")}
+            {t("nft.text7")}
           </Button>
-          <Box
+          {/* <Box
             sx={{
               display: "flex",
               justifyContent: "space-between",
@@ -434,7 +466,7 @@ export default function NftPage() {
             >
               {t('nft.text7')}
             </Button>
-          </Box>
+          </Box> */}
           <Typography sx={{ textAlign: "center", color: "#999", fontSize: "13px", mt: "17px" }} onClick={goPage}>{t("transferOutList")}</Typography>
         </Box>)}
 
@@ -495,6 +527,7 @@ export default function NftPage() {
                   <ListItem
                     key={item.id}
                     sx={{
+                      display: "flex",
                       bgcolor: "#FFF",
                       borderRadius: "12px",
                       display: "block",
@@ -503,42 +536,52 @@ export default function NftPage() {
                         ? 0 : "12px"
                     }}
                   >
-                    {/* 名称 */}
-                    <Typography
-                      variant="body1"
-                      sx={{
-                        fontSize: "16px",
-                        color: "#333",
-                        fontWeight: "bold",
-                        mb: 1
-                      }}
-                    >
-                      {item.name || 'NFT'}
-                    </Typography>
+                    <Box sx={{ display: "flex" }}>
+                      <img src={item.icon_path} width={'64px'} height={"64px"} alt="" />
 
-                    {/* 地址 */}
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        fontSize: "14px",
-                        color: "#666",
-                        mb: 1,
-                        fontFamily: "'Monospace', 'Courier New', monospace"
-                      }}
-                    >
-                      {item.contract_address}
-                    </Typography>
+                      <Box sx={{ ml: "10px",flex:1, display: "flex", justifyContent: "space-between" ,alignItems:'center'}}>
+                        <Box>
+                          {/* 名称 */}
+                          <Typography
+                            variant="body1"
+                            sx={{
+                              fontSize: "16px",
+                              color: "#333",
+                              fontWeight: "bold",
+                              mb: 1
+                            }}
+                          >
+                            {item.name || 'NFT'}
+                          </Typography>
 
-                    {/* 日期 */}
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        fontSize: "12px",
-                        color: "#999"
-                      }}
-                    >
-                      {item.create_time}
-                    </Typography>
+                          {/* 地址 */}
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontSize: "13px",
+                              color: "#666",
+                              mb: 1,
+                            }}
+                          >
+                            {formatAddress(item.address)}
+                          </Typography>
+                        </Box>
+                        <Box>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontSize: "15px",
+                              color: "#9ACD12",
+                              mb: 1,
+                            }}
+                          >
+                            {'X'+item.amount}
+                          </Typography>
+                        </Box>
+
+                      </Box>
+                    </Box>
+
                   </ListItem>
                 ))}
               </DataLoader>
@@ -588,7 +631,7 @@ export default function NftPage() {
                           }}>{Number(item.extra_info.my_percent) * 100 + '%'}</Typography>
                         </Box>
                       </Box>
-                      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'start' }}>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'end' }}>
                         <Typography sx={{ fontSize: '15px', color: '#9ACD12' }}>{t('reward.text15', { value: item.amount })}</Typography>
                         <Typography sx={{ fontSize: '14px', color: '#999' }}>{item.create_time}</Typography>
                       </Box>
@@ -607,19 +650,11 @@ export default function NftPage() {
           </Paper>
         )}
       </Box>
-
-      <BottomDialog
+      <ConfirmDialog
         open={dialogOpen}
         onClose={handleCloseDialog}
-        title={title}
-        inputValue={inputValue}
-        onInputChange={handleInputChange}
         onConfirm={handleConfirm}
-        onCancel={handleCancel}
-        confirmText={t("confirm")}
-        cancelText={t("cancel")}
-        inputPlaceholder={t("inputNum")}
-      />
+      ></ConfirmDialog>
     </Box>
   );
 }

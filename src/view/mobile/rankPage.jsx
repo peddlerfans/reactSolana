@@ -21,7 +21,12 @@ import RankingTabs from "../../components/PillTab";
 import { useRankList } from "../../hooks/useRankList";
 import { DataLoader } from "../../components/DataLoader";
 import { usePoolBalance } from "../../hooks/usePoolBalance";
-import LoadMore from "../../components/LoadMore";
+import { useSnackbar } from "../../utils/SnackbarContext";
+import { useWithdraw } from "../../hooks/useWithdraw";
+import { useLoading } from "../../utils/LoadingContext";
+import { useWalletReady } from "../../utils/WalletReadyContext";
+import { useUser } from "../../utils/UserContext";
+import ConfirmDialog from "../../components/ConfirmDialog";
 // 本地图片导入（替换为你的真实路径）
 import rankImg from "../../static/image/pages/rankImg.png"; // 顶部背景（示例）
 import daoIcon from "../../static/image/pages/dao_avatar.png"; // 中间 DAO 圆形图
@@ -121,9 +126,15 @@ const useStyles = makeStyles((theme) => ({
 export default function RewardRankingPage() {
   const classes = useStyles();
   const navigate = useNavigate(); // react-router v6
-  const { t } = useTranslation()
+  const { t } = useTranslation();
+  const { showSnackbar } = useSnackbar();
+  const { showLoading, hideLoading } = useLoading();
+  const { withdraw, loading: withdrawLoading } = useWithdraw();
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
   const [countdown, setCountdown] = React.useState(36000); // seconds demo
+  const { isLoggedIn, userInfo } = useUser(); // 获取登录状态和用户信息
+  const { walletReady } = useWalletReady();
   const labels = [t("rank.text7"), t("rank.text8"), t("rank.text9")]
   React.useEffect(() => {
     const t = setInterval(() => {
@@ -131,7 +142,18 @@ export default function RewardRankingPage() {
     }, 1000);
     return () => clearInterval(t);
   }, []);
-
+  const getRankType = (typeIndex) => {
+    switch (typeIndex) {
+      case 0:
+        return "big";
+      case 1:
+        return "new";
+      case 2:
+        return "yongdong";
+      default:
+        return "big";
+    }
+  }
   const {
     rankData, // 完整的data对象
     rankList, // 列表数据（快捷访问）
@@ -142,10 +164,11 @@ export default function RewardRankingPage() {
     loadMore,
     refetch,
     getRankTypeText
-  } = useRankList("big", 1, 10);
+  } = useRankList(getRankType(selectedTab), 1, 10);
 
   const {
     balance,
+    refetch:balanceFetch,
     loading: balanceLoading,
     error: balanceError,
     changePoolType
@@ -154,24 +177,67 @@ export default function RewardRankingPage() {
   const handleTabChange = (tabIndex) => {
     setSelectedTab(tabIndex);
     // 根据tabIndex执行相应的逻辑
-    // 根据Tab切换排行榜类型
-    let rankType;
-    switch (tabIndex) {
-      case 0:
-        rankType = "big";
-        break;
-      case 1:
-        rankType = "new";
-        break;
-      case 2:
-        rankType = "yongdong";
-        break;
-      default:
-        rankType = "big";
-    }
     changePoolType(tabIndex + 4)
-    changeRankType(rankType);
+    changeRankType(getRankType(tabIndex));
   };
+  const handleOpen = () => {
+    if (!Number(balance.account_balance)) {
+      showSnackbar(t("error.text9"), 'error')
+      return
+    }
+    if (!Number(balance.left_reward_balance)) {
+      showSnackbar(t("error.text10"), 'error')
+      return
+    }
+    setDialogOpen(true)
+  }
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
+  };
+  const handleConfirm = async () => {
+    showLoading(t('hooks.text3'));
+    try {
+      const getType = (key) => {
+        switch (key) {
+          case 0:
+            return "4";
+          case 1:
+            return "5"
+          case 2:
+            return "6"
+          default:
+        }
+      }
+      const res = await withdraw(getType(selectedTab));
+      console.log("成功提现:", res);
+      if (res.code === 200) {
+        showSnackbar(t('withdraw.text1'), 'success')
+      } else {
+        showSnackbar(res.msg, 'error')
+      }
+      handleCloseDialog();
+      refetch(); // 刷新页面余额
+    } catch (err) {
+      console.error("提现失败:", err);
+    } finally {
+      hideLoading();
+    }
+  };
+
+    // 🌟 关键：监听登录状态变化，重新请求数据
+    useEffect(() => {
+      console.log("NFT页面: 登录状态变化", {
+        isLoggedIn,
+        hasUserInfo: !!userInfo,
+        walletReady
+      });
+  
+      if (isLoggedIn && userInfo) {
+        console.log("NFT页面: 用户已登录，重新请求数据");
+        refetch();
+        balanceFetch();
+      }
+    }, [isLoggedIn, userInfo]); 
 
   const formatCountdown = () => {
     const now = new Date();
@@ -333,7 +399,7 @@ export default function RewardRankingPage() {
                     <Typography variant="body2" color="textSecondary">
                       {labels[selectedTab] ?? labels[0]}
                     </Typography>
-                    <Typography className={classes.percentBadge}>{balance?.f_percent+'%'}{t('rank.text10')}</Typography>
+                    <Typography className={classes.percentBadge}>{balance?.f_percent + '%'}{t('rank.text10')}</Typography>
                     <Typography className={classes.bigNumber}>{rankData.pool_total
                     }</Typography>
                   </Box>
@@ -384,6 +450,7 @@ export default function RewardRankingPage() {
 
                   <Button
                     variant="contained"
+                    onClick={() => handleOpen()}
                     sx={{
                       width: "100%",
                       mt: "20px",
@@ -395,7 +462,7 @@ export default function RewardRankingPage() {
                       mb: "11px"
                     }}
                   >
-                    {t('transferIn')}
+                    {t('assets.text7')}
                   </Button>
                   <Typography sx={{ textAlign: "center", color: "#999", fontSize: "13px", mt: "17px" }} onClick={goPage}>{t('transferOutList')}</Typography>
                 </Box>
@@ -467,7 +534,7 @@ export default function RewardRankingPage() {
                               color: "#95BE25",
                             }}
                           >
-                            {it.percent}
+                            {it.percent+'%'}
                           </Typography>
 
                           {/* <ChevronRightIcon
@@ -490,6 +557,11 @@ export default function RewardRankingPage() {
           )}
         </DataLoader>
       </Box>
+      <ConfirmDialog
+        open={dialogOpen}
+        onClose={handleCloseDialog}
+        onConfirm={handleConfirm}
+      ></ConfirmDialog>
     </div>
   );
 }

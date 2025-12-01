@@ -6,7 +6,6 @@ export const useGetMyTeam = () => {
   const [error, setError] = useState(null);
   const fetchTeam = async () => {
     try {
-       console.log("useMyTeam Hook执行了"); // 添加这行
       setLoading(true);
       setError(null);
       const res = await apiService.team.myTeam();

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState ,useEffect} from "react";
 import RewardHeader from "../../components/RewardHeader";
 import { Box, Typography, Button, IconButton, Paper } from "@mui/material";
 import { useTranslation } from "react-i18next";
@@ -7,16 +7,32 @@ import { DataLoader } from "../../components/DataLoader";
 import { formatAddress } from '../../utils/format';
 import communityBig from "../../static/image/pages/communityBig.png";
 import communitySmall from "../../static/image/pages/communitySmall.png";
-import GlobalSnackbar from "../../components/GlobalSnackbar";
+import { useSnackbar } from "../../utils/SnackbarContext";
+import { useWalletReady } from "../../utils/WalletReadyContext";
+import { useUser } from "../../utils/UserContext";
 const MyCommunityPage = () => {
-  const { team, loading, error } = useGetMyTeam();
+  const { team, loading, error ,refetch} = useGetMyTeam();
   const { t } = useTranslation()
-  const [toast, setToast] = useState({ open: false, message: '', type: 'success' });
+  const { showSnackbar } = useSnackbar();
+  const { isLoggedIn, userInfo } = useUser(); // 获取登录状态和用户信息
+  const { walletReady } = useWalletReady();
 
   const handleCopy = () => {
     navigator.clipboard.writeText(team.invite_code);
-    setToast({open:true,type:'success',msg:t('community.text12')});
+    showSnackbar(t('community.text12'), 'success');
   };
+  // useEffect(() => {
+  //   console.log("登录状态变化", {
+  //     isLoggedIn,
+  //     hasUserInfo: !!userInfo,
+  //     walletReady
+  //   });
+
+  //   if (isLoggedIn && userInfo) {
+  //     console.log("用户已登录，重新请求数据");
+  //     refetch();
+  //   }
+  // }, [isLoggedIn, userInfo]);
   return (
     <Box
       sx={{
@@ -37,9 +53,6 @@ const MyCommunityPage = () => {
         error={error}
         data={team}
         onRetry={false}
-        loadingText="团队数据加载中..."
-        errorText="团队数据加载失败"
-        emptyText="暂无团队数据"
       >
 
         {team => (
@@ -53,7 +66,7 @@ const MyCommunityPage = () => {
             />
 
             {/* 邀请码 */}
-            <Typography
+            {team.invite_code ? <Typography
               sx={{
                 fontSize: 20,
                 fontWeight: "bold",
@@ -62,7 +75,7 @@ const MyCommunityPage = () => {
               }}
             >
               {team.invite_code}
-            </Typography>
+            </Typography> : <Typography>{t("community.text14")}</Typography>}
 
             {/* 复制按钮 */}
             <Button
@@ -299,7 +312,7 @@ const MyCommunityPage = () => {
                       {t("community.text6")}
                     </Typography>
                     <Typography variant="body2" sx={{ fontWeight: "bold" }}>
-                      {member.address}
+                      {formatAddress(member.address)}
                     </Typography>
                   </Box>
 
@@ -353,18 +366,12 @@ const MyCommunityPage = () => {
                     </Typography>
                   </Box>
                 </Box>
-              ))) : (<Box>暂无小区</Box>)}
+              ))) : (<Box>{t("community.text13")}</Box>)}
 
             </Paper>
           </Box>
         )}
       </DataLoader>
-      <GlobalSnackbar
-        open={toast.open}
-        onClose={() => setToast({ ...toast, open: false })}
-        message={toast.message}
-        severity={toast.type}
-      />
     </Box>
   );
 };

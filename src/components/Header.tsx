@@ -23,14 +23,15 @@ import iconAsset from '../static/image/menu/asset.png';
 import iconReward from '../static/image/menu/reward.png';
 import iconNFT from '../static/image/menu/nft.png';
 import iconRank from '../static/image/menu/rank.png';
+import iconAirdrop from '../static/image/menu/airdrop.png';
 import iconCommunity from '../static/image/menu/community.png';
 import iconLanguage from '../static/image/menu/lang.png';
 import iconAddress from '../static/image/menu/address.png';
 import iconStatic from '../static/image/menu/static.png';
-import GlobalSnackbar from './GlobalSnackbar';
+import { useSnackbar } from "../utils/SnackbarContext";
 const Header: React.FC<{ showWallet?: boolean, address?: string }> = ({ showWallet = true, address }) => {
     const [open, setOpen] = React.useState(false);
-    const [toast, setToast] = useState({ open: false, message: '', type: 'success' });
+    const { showSnackbar } = useSnackbar();
     const toggleDrawer = (newOpen: boolean) => () => setOpen(newOpen);
     const navigate = useNavigate();
     const { t } = useTranslation();
@@ -39,6 +40,7 @@ const Header: React.FC<{ showWallet?: boolean, address?: string }> = ({ showWall
         { text: t("drawer.text3"), icon: iconReward, url: "/h5/reward" },
         { text: t("drawer.text4"), icon: iconNFT, url: "/h5/nftPage" },
         { text: t("drawer.text5"), icon: iconRank, url: "/h5/rank" },
+        { text: t("drawer.text10"), icon: iconAirdrop, url: "/h5/airdrop" },
         { text: t("drawer.text6"), icon: iconCommunity, url: "/h5/community" },
         { text: t("drawer.text9"), icon: iconStatic, url: "/h5/staticIncome" },
     ];
@@ -52,7 +54,7 @@ const Header: React.FC<{ showWallet?: boolean, address?: string }> = ({ showWall
         if (localStorage.getItem("token")) {
             navigate(data.url)
         } else {
-            setToast({ open: true, message: "请先链接钱包", type: "error" })
+            showSnackbar(t("sign.text1"), "error")
         }
     }
     // 定义所有需要国际化的标签
@@ -159,13 +161,25 @@ const Header: React.FC<{ showWallet?: boolean, address?: string }> = ({ showWall
     );
 
     return (
-        <AppBar position="static" color="transparent" elevation={0}>
-            <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', px: { xs: 1, md: 4 } }}>
+        <AppBar position="fixed" color="transparent" elevation={0} sx={{
+            zIndex: 9995,     // 让你的 header 永远在最上层
+            pointerEvents: "auto !important",
+        }}>
+            <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', px: { xs: 1, md: 4 }, pointerEvents: "auto" }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <IconButton edge="start" aria-label="menu" sx={{ color: "white" }} onClick={toggleDrawer(true)}>
+                    <IconButton edge="start" aria-label="menu" sx={{
+                        color: "white", zIndex: 9996,
+                        pointerEvents: "auto !important",
+                    }} onClick={toggleDrawer(true)}
+                    >
                         <MenuIcon />
                     </IconButton>
-                    <Drawer anchor="left" open={open} onClose={toggleDrawer(false)}>
+                    <Drawer anchor="left" open={open} onClose={toggleDrawer(false)}
+                        sx={{
+                            zIndex: 9999,
+                            pointerEvents: "auto",
+                        }}
+                    >
                         {DrawerList}
                     </Drawer>
                 </Box>
@@ -176,12 +190,6 @@ const Header: React.FC<{ showWallet?: boolean, address?: string }> = ({ showWall
                     /> : null}
                 </Box>
             </Toolbar>
-            <GlobalSnackbar
-                open={toast.open}
-                onClose={() => setToast({ ...toast, open: false })}
-                message={toast.message}
-                severity={toast.type}
-            />
         </AppBar>
     );
 };

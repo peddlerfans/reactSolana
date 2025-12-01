@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const instance = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://8.137.122.255:8090',
+  baseURL: process.env.REACT_APP_API_URL || 'https://fiting-two.testznetwork.online',
   timeout: 10000,
 });
 

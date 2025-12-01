@@ -35,7 +35,7 @@ export const useRankList = (defaultType = "big", defaultPage = 1, defaultSize = 
           response = await apiService.rank.newRankList(requestData);
           break;
         default:
-          throw new Error("未知的排行榜类型");
+          // throw new Error("未知的排行榜类型");
       }
 
       // 保存整个data对象，而不仅仅是list

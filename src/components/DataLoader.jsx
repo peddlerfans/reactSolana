@@ -12,8 +12,8 @@ export const DataLoader = ({
   error,
   data,
   children,
-  loadingText = '加载中...',
-  errorText = '加载失败',
+  loadingText,
+  errorText,
   minHeight = 200,
   onRetry
 }) => {
@@ -30,7 +30,7 @@ export const DataLoader = ({
         gap: 2
       }}>
         <CircularProgress />
-        <Typography color="text.secondary">{loadingText}</Typography>
+        <Typography color="text.secondary">{t("loading")}</Typography>
       </Box>
     );
   }
@@ -53,7 +53,7 @@ export const DataLoader = ({
             )
           }
         >
-          {errorText}: {error}
+          {t("loadError")}: {error}
         </Alert>
       </Box>
     );
@@ -71,7 +71,7 @@ export const DataLoader = ({
   } catch (err) {
     console.error('DataLoader渲染错误:', err);
     // 延迟跳转到根路由，给用户短暂提示时间
-    setTimeout(() => window.location.replace('/'), 1000);
+    // setTimeout(() => window.location.replace('/'), 1000);
     return (
       <Box sx={{ p: 3 }}>
         <Alert severity="error">

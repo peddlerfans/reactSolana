@@ -8,13 +8,16 @@ import {
   Box,
   Typography,
   TextField,
+  IconButton
 } from "@mui/material";
+import CloseIcon from '@material-ui/icons/Close';
 const PasswordDialog = ({
   open,
   onClose,
   onConfirm,
   onInputChange,
   password,
+  iconImage,
   title = "输入密码",
   buttonText = "确定",
   inputPlaceholder = "请输入...",
@@ -44,11 +47,17 @@ const PasswordDialog = ({
         <Typography variant="h5" fontWeight="bold">
           {title}
         </Typography>
+        <IconButton
+          onClick={onClose}
+          sx={{ position: "absolute", top: 8, right: 8, color: "#555" }}
+        >
+          <CloseIcon />
+        </IconButton>
       </DialogTitle>
       <Box sx={{ pb: 1, position: "relative" }}>
         <Box
           component="img"
-          src={require("../static/image/fiting/inviteImg.png")}
+          src={iconImage}
           alt="close"
           width={120}
           height={120}
@@ -79,15 +88,15 @@ const PasswordDialog = ({
             bgcolor: "#F5F5F9",
             border: "none",
           }}
-          //   InputProps={{
-          //     endAdornment: (
-          //       <InputAdornment position="end">
-          //         <IconButton onClick={handleClickShowPassword} edge="end">
-          //           {showPassword ? <VisibilityOff /> : <Visibility />}
-          //         </IconButton>
-          //       </InputAdornment>
-          //     ),
-          //   }}
+        //   InputProps={{
+        //     endAdornment: (
+        //       <InputAdornment position="end">
+        //         <IconButton onClick={handleClickShowPassword} edge="end">
+        //           {showPassword ? <VisibilityOff /> : <Visibility />}
+        //         </IconButton>
+        //       </InputAdornment>
+        //     ),
+        //   }}
         />
       </DialogContent>
 

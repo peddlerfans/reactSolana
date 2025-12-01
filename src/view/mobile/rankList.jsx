@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState ,useEffect} from "react";
 import { useTranslation } from "react-i18next";
 import RewardHeader from "../../components/RewardHeader";
 import List from "@mui/material/List";
@@ -9,10 +9,15 @@ import { useIncome } from "../../hooks/useIncome";
 import { DataLoader } from "../../components/DataLoader";
 import { useWithdraw } from "../../hooks/useWithdraw";
 import ConfirmDialog from "../../components/ConfirmDialog";
+import { useWalletReady } from "../../utils/WalletReadyContext";
+import { useUser } from "../../utils/UserContext";
 export default function RankList() {
-  const {t} = useTranslation()
+  const { t } = useTranslation()
   const [tab, setTab] = useState(0);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const { isLoggedIn, userInfo } = useUser(); // 获取登录状态和用户信息
+  const { walletReady } = useWalletReady();
+
   const {
     incomeData,
     loading,
@@ -49,6 +54,19 @@ export default function RankList() {
       console.error("提现失败:", err);
     }
   };
+
+  useEffect(() => {
+    console.log("登录状态变化", {
+      isLoggedIn,
+      hasUserInfo: !!userInfo,
+      walletReady
+    });
+
+    if (isLoggedIn && userInfo) {
+      console.log("用户已登录，重新请求数据");
+      refetch();
+    }
+  }, [isLoggedIn, userInfo]);
   return (
     <Box sx={{ padding: "0 12px", width: "100%", boxSizing: "border-box" }}>
       <RewardHeader title={t('nft.text11')} />

@@ -12,7 +12,7 @@ import {
   ListItem
 } from "@mui/material";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
@@ -23,6 +23,10 @@ import { useIncome } from "../../hooks/useIncome";
 import { useWithdraw } from "../../hooks/useWithdraw";
 import { DataLoader } from "../../components/DataLoader";
 import ConfirmDialog from "../../components/ConfirmDialog";
+import { useSnackbar } from "../../utils/SnackbarContext";
+import { useLoading } from "../../utils/LoadingContext";
+import { useWalletReady } from "../../utils/WalletReadyContext";
+import { useUser } from "../../utils/UserContext";
 const useStyles = makeStyles((theme) => ({
   root: {
     minHeight: "100vh",
@@ -48,9 +52,14 @@ const useStyles = makeStyles((theme) => ({
 export default function NftPage() {
   const classes = useStyles();
   const navigate = useNavigate();
+  const { showSnackbar } = useSnackbar()
+  const { showLoading, hideLoading } = useLoading()
   const { t } = useTranslation();
   const currentDate = useCurrentDate();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const { isLoggedIn, userInfo } = useUser(); // 获取登录状态和用户信息
+  const { walletReady } = useWalletReady();
+
   const {
     balance,
     loading,
@@ -65,25 +74,61 @@ export default function NftPage() {
     loadMore
   } = useIncome(1)
   const { withdraw, loading: withdrawLoading } = useWithdraw();
-  const handleOpenDialog = useCallback((str) => {
+  const handleOpenDialog = (() => {
+    if (!Number(balance.account_balance)) {
+      showSnackbar(t("error.text9"), 'error')
+      return
+    }
+    if (!Number(balance.left_reward_balance)) {
+      showSnackbar(t("error.text10"), 'error')
+      return
+    }
     setDialogOpen(true);
-  }, []);
+  });
 
   const handleCloseDialog = () => {
     setDialogOpen(false);
   };
   const handleConfirm = async () => {
+    showLoading(t('hooks.text3'));
     try {
-      const res = await withdraw(1);
+      const res = await withdraw('1');
       console.log("成功提现:", res);
-
+      if (res.code === 200) {
+        showSnackbar(t('withdraw.text1'), 'success')
+      } else {
+        showSnackbar(res.msg, 'error')
+      }
       handleCloseDialog();
       refetch(); // 刷新页面余额
     } catch (err) {
       console.error("提现失败:", err);
+    } finally {
+      hideLoading()
     }
   };
 
+  // 🌟 关键：监听登录状态变化，重新请求数据
+  useEffect(() => {
+    console.log("登录状态变化", {
+      isLoggedIn,
+      hasUserInfo: !!userInfo,
+      walletReady
+    });
+
+    if (isLoggedIn && userInfo) {
+      console.log("用户已登录，重新请求数据");
+      refetch();
+      incomeRefetch();
+    }
+  }, [isLoggedIn, userInfo]); // 监听登录状态和用户信息变化
+  // useEffect(() => {
+  //   if (walletReady) {
+  //     console.log("钱包准备好了，自动重新请求数据");
+  //     refetch();
+  //     incomeRefetch();
+  //   }
+  // }, [walletReady, refetch, incomeRefetch]);
 
   const goPage = () => {
     navigate("/h5/asset?type=1")

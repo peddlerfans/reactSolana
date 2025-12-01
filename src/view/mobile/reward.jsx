@@ -16,18 +16,24 @@ import { useUserInfo } from "../../hooks/useUserInfo"; // 假设你有获取用�
 import { DataLoader } from "../../components/DataLoader";
 import { usePoolBalance } from "../../hooks/usePoolBalance";
 import { useWithdraw } from "../../hooks/useWithdraw";
-import GlobalSnackbar from "../../components/GlobalSnackbar";
 import { getCurrentDate } from "../../utils/format";
+import { useSnackbar } from "../../utils/SnackbarContext";
+import { useLoading } from "../../utils/LoadingContext";
 import LoadMore from "../../components/LoadMore";
 import ConfirmDialog from "../../components/ConfirmDialog";
+import { useUser } from "../../utils/UserContext";
+import { useWalletReady } from "../../utils/WalletReadyContext";
 const Reward = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const { showSnackbar } = useSnackbar();
+  const { showLoading, hideLoading } = useLoading()
   const [tab, setTab] = useState(0);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [toast, setToast] = useState({ open: false, message: '', type: 'success' });
   // 获取用户信息（包含等级）
   const { userInfo, loading: userLoading } = useUserInfo();
+  const { isLoggedIn, userInfo: getUserInfo } = useUser(); // 获取登录状态和用户信息
+  const { walletReady } = useWalletReady()
   const userLevel = userInfo?.user_level; // 假设用户信息中包含level字段
   const {
     rewardData,
@@ -39,7 +45,7 @@ const Reward = () => {
     loadMore,
     refetch,
     getRewardTypeText
-  } = useTeamReward("teamUser", 1, 10, userLevel);
+  } = useTeamReward("teamUser", 1, 10, (userLevel || "F9"));
   const { withdraw } = useWithdraw()
   const { balance, loading: balanceLoading, error: balanceError, refetch: balanceRefetch, changePoolType } = usePoolBalance(2)
   const handleTabChange = (event, newValue) => {
@@ -60,7 +66,7 @@ const Reward = () => {
     } else {
       changePoolType(3, "F9")
     }
-    changeRewardType(rewardType);
+    changeRewardType(rewardType, userInfo?.user_level);
   };
 
   const currentDate = useCurrentDate();
@@ -92,24 +98,60 @@ const Reward = () => {
   );
 
   const handleOpenDialog = () => {
+    if (!Number(balance.account_balance) && tab === 0) {
+      showSnackbar(t("error.text9"), 'error')
+      return
+    }
+    if (!Number(balance.left_reward_balance) && tab === 0) {
+      showSnackbar(t("error.text10"), 'error')
+      return
+    }
+    if (tab === 1 && !Number(poolMap[userLevel]?.amount)) {
+      showSnackbar(t("error.text9"), 'error')
+      return
+    }
+    if (tab === 1 && !Number(poolMap[userLevel]?.amount)) {
+      showSnackbar(t("error.text9"), 'error')
+      return
+    }
     setDialogOpen(true);
   };
   const handleCloseDialog = () => {
-    setToast({ open: true, message: '质押成功！', type: 'success' });
     setDialogOpen(false);
   };
   const handleConfirm = async () => {
+    showLoading(t('hooks.text3'));
     try {
-      const type = tab === 0 ? 2 : userLevel
+      const type = tab === 0 ? '2' : userLevel
       const res = await withdraw(type);
-      console.log("成功提现:", res);
-
+      if (res.code === 200) {
+        showSnackbar(t('withdraw.text1'), 'success')
+      } else {
+        showSnackbar(res.msg, 'error')
+      }
       handleCloseDialog();
       refetch(); // 刷新页面余额
     } catch (err) {
       console.error("提现失败:", err);
+    } finally {
+      hideLoading()
     }
   };
+
+  // 🌟 关键：监听登录状态变化，重新请求数据
+  useEffect(() => {
+    console.log("登录状态变化", {
+      isLoggedIn,
+      hasUserInfo: !!getUserInfo,
+      walletReady
+    });
+
+    if (isLoggedIn && getUserInfo) {
+      console.log("用户已登录，重新请求数据");
+      refetch();
+      balanceRefetch();
+    }
+  }, [isLoggedIn, getUserInfo]);
 
   const goPage = () => {
     navigate(`/h5/asset?type=${tab + 2}`)
@@ -256,7 +298,7 @@ const Reward = () => {
                           }}>{item.level} </Typography>
                           {t('reward.text16')}</Typography>
                         <Typography sx={{ fontSize: "11px", color: "rgba(255, 255, 255, 0.40)" }}>{getCurrentDate()}</Typography>
-                        <Typography sx={{ fontSize: "14px", color: "rgba(255, 255, 255, 0.80)" }}>{t('rewrd.text17') + (poolMap[item.level]?.f_percent ?? 0) + '%'}</Typography>
+                        <Typography sx={{ fontSize: "14px", color: "rgba(255, 255, 255, 0.80)" }}>{t('reward.text17') + (poolMap[item.level]?.f_percent ?? 0) + '%'}</Typography>
                         <Typography sx={{ fontSize: "28px" }}>
                           {poolMap[item.level]?.amount ?? 0}
                         </Typography>
@@ -348,7 +390,7 @@ const Reward = () => {
                 variant="body2"
                 style={{ color: "#333", fontSize: "14px" }}
               >
-                {tab === 0 ? rewardData.extra.invite_count + t("reward.text9") : userLevel || t('reward.text19')}
+                {tab === 0 ? rewardData.extra.invite_count + t("reward.text9") : userLevel || "F9"}
               </Typography>
             </Box>
             <Box
@@ -412,7 +454,7 @@ const Reward = () => {
                 variant="body2"
                 style={{ color: "#333", fontSize: "14px" }}
               >
-                {tab === 0 ? balance.account_balance + t("trump") : poolMap[userLevel]?.amount + t("trump")}
+                {tab === 0 ? balance.account_balance + t("trump") : poolMap[userLevel]?.amount || 0 + t("trump")}
               </Typography>
             </Box>
             <Box
@@ -427,7 +469,7 @@ const Reward = () => {
                 variant="body2"
                 style={{ color: "#888", fontSize: "14px" }}
               >
-                {t('assers.text5')}
+                {t('assets.text5')}
               </Typography>
 
               <Typography
@@ -525,7 +567,7 @@ const Reward = () => {
                               variant="body1"
                               sx={{ fontSize: "14px", color: "#333" }}
                             >
-                              {item.user_level + t('reward.text11')}
+                              {item.user_level || "F9" + t('reward.text11')}
                             </Typography>
                             <Typography
                               variant="body1"
@@ -722,12 +764,6 @@ const Reward = () => {
         </Box>)}
 
       </DataLoader>
-      <GlobalSnackbar
-        open={toast.open}
-        onClose={() => setToast({ ...toast, open: false })}
-        message={toast.message}
-        severity={toast.type}
-      />
       {/* <BottomDialog
         open={dialogOpen}
         onClose={handleCloseDialog}

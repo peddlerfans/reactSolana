@@ -1,7 +1,8 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useSnackbar } from "../utils/SnackbarContext";
 import { useTranslation } from "react-i18next";
 import { apiService } from "../utils/apiService";
+
 export const useAirdropAdvanced = () => {
   const [loading, setLoading] = useState(false);
   const [claimLoading, setClaimLoading] = useState(false);
@@ -12,19 +13,23 @@ export const useAirdropAdvanced = () => {
       current: 1,
       size: 10,
       total: 0,
+      hasMore: false,
     },
   });
+
+  const [loadingMore, setLoadingMore] = useState(false);
+  const isFetchingRef = useRef(false);
 
   const { showSnackbar } = useSnackbar();
   const { t } = useTranslation();
 
-  // 获取空投列表（带过滤）
+  // 获取空投列表
   const getAirdropList = useCallback(async () => {
     setLoading(true);
     try {
       const response = await apiService.airdrop.airdropList({
-        page: "1",
-        size: "5",
+        page: 1,
+        size: 5,
       });
       const data = response.data || [];
 
@@ -45,23 +50,20 @@ export const useAirdropAdvanced = () => {
     }
   }, [showSnackbar, t]);
 
-  // 领取空投（支持多个空投）
+  // 领取单个空投
   const claimAirdrop = useCallback(
     async (claimData) => {
       setClaimLoading(true);
       try {
         const response = await apiService.airdrop.setAddress(claimData);
-
-        showSnackbar(t("airdrop.claimSuccess") || "领取成功", "success");
-
+        
         // 领取成功后刷新列表
         await getAirdropList();
-
-        return response.data;
+        
+        return response;
       } catch (error) {
         console.error("领取空投失败:", error);
-
-        // 更详细的错误处理
+        
         let errorMessage = t("airdrop.claimFailed") || "领取失败";
         if (error.message?.includes("already claimed")) {
           errorMessage = t("airdrop.alreadyClaimed") || "已领取过该空投";
@@ -83,7 +85,11 @@ export const useAirdropAdvanced = () => {
   // 获取空投记录（带分页）
   const getAirdropRecords = useCallback(
     async (pagination = {}) => {
+      if (isFetchingRef.current) return;
+      
+      isFetchingRef.current = true;
       setLoading(true);
+      
       try {
         const { current = 1, size = 10 } = pagination;
 
@@ -100,6 +106,7 @@ export const useAirdropAdvanced = () => {
             current,
             size,
             total: data.length || 0,
+            hasMore: size === data.length
           },
         });
 
@@ -113,91 +120,93 @@ export const useAirdropAdvanced = () => {
         throw error;
       } finally {
         setLoading(false);
+        isFetchingRef.current = false;
       }
     },
     [showSnackbar, t]
   );
 
-  // 批量操作
-  const batchClaim = useCallback(
-    async (airdropIds) => {
-      if (!airdropIds || airdropIds.length === 0) {
-        showSnackbar("请选择要领取的空投", "warning");
-        return;
-      }
+  // 加载更多空投记录
+  const loadMoreRecords = useCallback(async () => {
+    // 防止重复请求
+    if (isFetchingRef.current || !airdropRecords.pagination.hasMore) {
+      return;
+    }
 
-      setClaimLoading(true);
-      try {
-        const claims = airdropIds.map((id) => claimAirdrop({ airdropId: id }));
+    const nextPage = airdropRecords.pagination.current + 1;
+    
+    // 如果已经加载了所有数据，就不再请求
+    if (airdropRecords.list.length >= airdropRecords.pagination.total && airdropRecords.pagination.total > 0) {
+      console.log("所有数据已加载完成");
+      return;
+    }
 
-        const results = await Promise.allSettled(claims);
+    isFetchingRef.current = true;
+    setLoadingMore(true);
 
-        const successful = results.filter(
-          (result) => result.status === "fulfilled"
-        ).length;
-        const failed = results.filter(
-          (result) => result.status === "rejected"
-        ).length;
-
-        if (successful > 0) {
-          showSnackbar(`成功领取 ${successful} 个空投`, "success");
-        }
-        if (failed > 0) {
-          showSnackbar(`${failed} 个空投领取失败`, "warning");
-        }
-
-        // 刷新数据
-        await getAirdropList();
-
-        return results;
-      } catch (error) {
-        console.error("批量领取失败:", error);
-        throw error;
-      } finally {
-        setClaimLoading(false);
-      }
-    },
-    [claimAirdrop, getAirdropList, showSnackbar]
-  );
-
-  // 搜索空投记录
-  const searchRecords = useCallback(
-    async (keyword, pagination = {}) => {
-      return await getAirdropRecords({
-        ...pagination,
-        keyword,
+    try {
+      const response = await apiService.airdrop.getList({
+        page: nextPage,
+        size: airdropRecords.pagination.size,
       });
-    },
-    [getAirdropRecords]
-  );
+
+      const data = response.data || [];
+      const newRecords = data || [];
+      
+      // 合并数据
+      const mergedList = [...airdropRecords.list, ...newRecords];
+      
+      setAirdropRecords({
+        list: mergedList,
+        pagination: {
+          ...airdropRecords.pagination,
+          current: nextPage,
+          total: mergedList.length, // 更新总数
+          hasMore:airdropRecords.pagination.size === newRecords.length
+        },
+      });
+
+      return newRecords;
+    } catch (error) {
+      console.error("加载更多空投记录失败:", error);
+      showSnackbar(
+        error.message || t("airdrop.loadMoreFailed") || "加载更多失败",
+        "error"
+      );
+      throw error;
+    } finally {
+      setLoadingMore(false);
+      isFetchingRef.current = false;
+    }
+  }, [airdropRecords, showSnackbar, t]);
 
   return {
-    // 状态
+    // 状态 - 保持原有接口
     loading,
     claimLoading,
     airdropList,
     airdropRecords: airdropRecords.list,
     pagination: airdropRecords.pagination,
 
-    // 方法
+    // 新增的加载更多状态
+    loadingMore,
+    
+    // 方法 - 保持原有接口
     getAirdropList,
     claimAirdrop,
     getAirdropRecords,
-    batchClaim,
-    searchRecords,
-
-    // 便捷状态
+    
+    // 新增的加载更多方法
+    loadMoreRecords,
+    
+    // 便捷状态 - 保持原有接口
     hasAirdrops: airdropList.length > 0,
     hasRecords: airdropRecords.list.length > 0,
     totalAirdrops: airdropList.length,
     totalRecords: airdropRecords.pagination.total,
-
-    // 过滤方法
-    getAvailableAirdrops: () =>
-      airdropList.filter((item) => item.status === "available"),
-    getClaimedAirdrops: () =>
-      airdropList.filter((item) => item.status === "claimed"),
-    getExpiredAirdrops: () =>
-      airdropList.filter((item) => item.status === "expired"),
+    
+    // 新增的便捷状态
+    canLoadMore: airdropRecords.list.length < airdropRecords.pagination.total || 
+                airdropRecords.pagination.total === 0,
   };
 };

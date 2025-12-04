@@ -1,14 +1,16 @@
-// hooks/useIncome.js
-import { useState, useEffect, useCallback } from "react";
-import { apiService } from "../utils/apiService";
+import { useState, useCallback, useEffect } from "react";
 import { useSnackbar } from "../utils/SnackbarContext";
 import { useTranslation } from "react-i18next";
+import { apiService } from "../utils/apiService";
+
 export const useIncome = (incomeType, defaultPage = 1, defaultSize = 10) => {
-  const [incomeData, setIncomeData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [incomeData, setIncomeData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false); // 新增：专门用于加载更多的状态
   const [error, setError] = useState(null);
   const { showSnackbar } = useSnackbar();
   const { t } = useTranslation();
+  
   const [pagination, setPagination] = useState({
     page: defaultPage,
     size: defaultSize,
@@ -17,21 +19,26 @@ export const useIncome = (incomeType, defaultPage = 1, defaultSize = 10) => {
     hasMore: false,
   });
 
-  // 获取NFT收益
-  const fetchNftIncome = useCallback(
+  // ✅ 统一的数据获取函数，类似 useUserInfo 的 fetchRecords
+  const fetchIncomeData = useCallback(
     async (
       type = incomeType,
-      page = pagination.page,
-      size = pagination.size
+      page = 1,
+      size = defaultSize,
+      isLoadMore = false
     ) => {
       try {
-        setLoading(true);
+        // 设置正确的加载状态
+        if (isLoadMore) {
+          setLoadingMore(true);
+        } else {
+          setLoading(true);
+        }
         setError(null);
 
-        // 验证type参数
         if (!type) {
           showSnackbar(t("hooks.text1"), "error");
-          // throw new Error("查询NFT收益需要type参数");
+          throw new Error("查询NFT收益需要type参数");
         }
 
         const response = await apiService.nft.nftIncome({
@@ -40,132 +47,98 @@ export const useIncome = (incomeType, defaultPage = 1, defaultSize = 10) => {
           size,
         });
 
-        const responseData = response.data;
-        const listData = responseData?.list || responseData?.data || [];
+        const responseData = response.data || {};
+        const listData = responseData?.list || responseData?.data || responseData || [];
         const total = responseData?.total || listData.length || 0;
         const totalPages = Math.ceil(total / size);
+        
+        // ✅ 关键：根据 isLoadMore 决定是替换还是追加数据
+        if (isLoadMore) {
+          // 加载更多：追加数据
+          setIncomeData(prev => [...prev, ...listData]);
+        } else {
+          // 初始加载：替换数据
+          setIncomeData(listData);
+        }
 
-        setIncomeData(responseData);
+        // 更新分页信息
         setPagination({
           page,
           size,
           total,
           totalPages,
-          hasMore: size === total,
+          hasMore: listData.length >= size,
         });
 
-        return responseData;
+        return {
+          list: listData,
+          total,
+          page,
+          size,
+        };
       } catch (err) {
         const errorMessage = err.response?.data?.message || "获取NFT收益失败";
         setError(errorMessage);
-        showSnackbar(t("hooks.text2") + error, "error");
-        // console.error("获取NFT收益失败:", err);
+        showSnackbar(t("hooks.text2") + errorMessage, "error");
         throw err;
       } finally {
-        setLoading(false);
+        if (isLoadMore) {
+          setLoadingMore(false);
+        } else {
+          setLoading(false);
+        }
       }
     },
-    [incomeType, pagination.page, pagination.size]
+    [incomeType, defaultSize, showSnackbar, t]
   );
 
-  // 改变收益类型
+  // ✅ 加载更多（类似 useUserInfo 的 loadMore）
+  const loadMore = useCallback(async () => {
+    if (loadingMore || !pagination.hasMore) return;
+    await fetchIncomeData(incomeType, pagination.page + 1, pagination.size, true);
+  }, [loadingMore, pagination, incomeType, fetchIncomeData]);
+
+  // ✅ 刷新数据（回到第一页）
+  const refetch = useCallback(async () => {
+    await fetchIncomeData(incomeType, 1, pagination.size, false);
+  }, [incomeType, pagination.size, fetchIncomeData]);
+
+  // ✅ 改变收益类型（重置到第一页）
   const changeIncomeType = useCallback(
     async (newType) => {
-      await fetchNftIncome(newType, 1, pagination.size);
+      await fetchIncomeData(newType, 1, pagination.size, false);
     },
-    [fetchNftIncome, pagination.size]
+    [pagination.size, fetchIncomeData]
   );
 
-  // 加载更多
-  const loadMore = useCallback(async () => {
-    if (loading || !pagination.hasMore) return;
-
-    const nextPage = pagination.page + 1;
-    try {
-      setLoading(true);
-
-      const newData = await fetchNftIncome(
-        incomeType,
-        nextPage,
-        pagination.size
-      );
-
-      // 合并数据
-      setIncomeData((prev) => ({
-        ...prev,
-        ...newData,
-        list: [...(prev?.list || []), ...(newData?.list || [])],
-      }));
-    } catch (err) {
-      console.error("加载更多失败:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [loading, pagination, incomeType, fetchNftIncome]);
-
-  // 改变分页
-  const changePage = useCallback(
-    async (newPage, newSize = pagination.size) => {
-      await fetchNftIncome(incomeType, newPage, newSize);
-    },
-    [incomeType, fetchNftIncome, pagination.size]
-  );
-
-  // 刷新数据
-  const refetch = useCallback(async () => {
-    await fetchNftIncome(incomeType, 1, pagination.size);
-  }, [incomeType, fetchNftIncome, pagination.size]);
-
-  // 初始化加载
+  // ✅ 初始加载
   useEffect(() => {
     if (incomeType) {
-      fetchNftIncome();
-    } else {
-      setLoading(false);
-      setError("请提供收益类型参数");
+      fetchIncomeData(incomeType, 1, defaultSize, false);
     }
-  }, []);
-
-  // 当incomeType变化时重新获取数据
-  useEffect(() => {
-    if (incomeType) {
-      fetchNftIncome(incomeType, 1, pagination.size);
-    }
-  }, [incomeType]);
-
-  // 获取收益类型文本
-  const getIncomeTypeText = (type) => {
-    const typeMap = {
-      1: "静态收益",
-      2: "加权收益",
-      3: "团队收益",
-    };
-    return typeMap[type] || "未知收益";
-  };
+  }, [incomeType, defaultSize, fetchIncomeData]);
 
   return {
     // 数据
     incomeData,
-    incomeList: incomeData?.list || incomeData?.data || [],
-
-    // 加载状态
-    loading,
-    error,
-
+    
     // 分页信息
     pagination,
-
-    // 类型信息
-    incomeType,
-
+    
+    // 加载状态
+    loading,          // 初始加载状态
+    loadingMore,      // 加载更多状态
+    error,
+    
     // 操作方法
-    changeIncomeType,
+    fetchIncomeData: (type, page, size) => fetchIncomeData(type, page, size, false), // 对外暴露时不带 isLoadMore
     loadMore,
-    changePage,
     refetch,
-    fetchNftIncome,
-
-    // 工具函数
-    getIncomeTypeText: () => getIncomeTypeText(incomeType),
+    changeIncomeType,
+    
+    // 便捷状态
+    hasMore: pagination.hasMore,
+    isEmpty: incomeData.length === 0,
+    totalCount: pagination.total,
   };
 };

@@ -24,6 +24,7 @@ import { useAirdropAdvanced } from '../../hooks/useAirdrop';
 import { useWalletReady } from "../../utils/WalletReadyContext";
 import { useUser } from "../../utils/UserContext";
 import LoadMore from "../../components/LoadMore";
+import { formatAddress } from '../../utils/format';
 import airDropImage from "../../static/image/fiting/airDropImage.png"
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -116,6 +117,7 @@ export default function NftPage() {
     getAirdropList,
     claimAirdrop,
     pagination,
+    loadMoreRecords,
     getAirdropRecords
   } = useAirdropAdvanced();
   useEffect(() => {
@@ -127,22 +129,32 @@ export default function NftPage() {
     setAddressOpen(false);
   };
   const handleConfirm = async () => {
-    showLoading(t('hooks.text3'));
+    showLoading(t('loading'));
     try {
-      const res = await claimAirdrop({ acq_addr: address, airdrop_id: airdropList[0].id });
-      // if (res.code === 200) {
-      //   showSnackbar(t('withdraw.text1'), 'success')
-      // } else {
-      //   showSnackbar(res.msg, 'error')
-      // }
+      if(!airdropList[0]?.id){
+        showSnackbar(t("990402"),'error')
+        handleClose();
+        setAddress("")
+        return
+      }
+      const res = await claimAirdrop({ acq_addr: address, airdrop_id: airdropList[0]?.id || "" });
+      if(res.code === 200){
+        showSnackbar(t('error.text12'),'success')
+      }else{
+        setAddress("")
+        showSnackbar(t(`${res.code}`),'error')
+      }
       handleClose();
-      airdropList(); // 刷新页面余额
-      getAirdropList();
+      getAirdropRecords(); // 刷新页面余额
     } catch (err) {
       console.error("提现失败:", err);
     } finally {
       hideLoading()
     }
+  };
+
+  const handlePwdInputChange = (event) => {
+    setAddress(event.target.value);
   };
 
   // 🌟 关键：监听登录状态变化，重新请求数据
@@ -370,7 +382,7 @@ export default function NftPage() {
                   variant="body2"
                   style={{ color: "#A069F6", fontSize: "14px" }}
                 >
-                  {airdropList[0]?.airuser?.acq_addr}
+                  {formatAddress(airdropList[0]?.airuser?.acq_addr)}
                 </Typography>
               </Box>
             ) : <Button
@@ -426,7 +438,7 @@ export default function NftPage() {
                           color: '#A069F6',
                           borderRadius: '4px',
                           fontSize: '13px',
-                        }}>{item.info.contract_addr}</Typography>
+                        }}>{formatAddress(item.info.contract_addr)}</Typography>
                       </Box>
                     </Box>
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'end' }}>
@@ -442,7 +454,7 @@ export default function NftPage() {
             <LoadMore
               loading={loading}
               hasMore={pagination.hasMore}
-            // onLoadMore={incomeLoadMore}
+            onLoadMore={loadMoreRecords}
             />
           </List>
         </Paper>
@@ -456,6 +468,7 @@ export default function NftPage() {
         buttonText={t("confirm")}
         inputPlaceholder={t("airdrop.text5")}
         iconImage={airDropImage}
+        onInputChange={handlePwdInputChange}
       />
     </Box>
   );

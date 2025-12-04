@@ -27,6 +27,7 @@ import { useSnackbar } from "../../utils/SnackbarContext";
 import { useLoading } from "../../utils/LoadingContext";
 import { useWalletReady } from "../../utils/WalletReadyContext";
 import { useUser } from "../../utils/UserContext";
+import LoadMore from "../../components/LoadMore";
 const useStyles = makeStyles((theme) => ({
   root: {
     minHeight: "100vh",
@@ -71,6 +72,7 @@ export default function NftPage() {
     loading: incomeLoading,
     error: incomeError,
     refetch: incomeRefetch,
+    pagination,
     loadMore
   } = useIncome(1)
   const { withdraw, loading: withdrawLoading } = useWithdraw();
@@ -139,6 +141,7 @@ export default function NftPage() {
       sx={{
         width: "100%",
         minHeight: "100vh",
+        // overflow:"scroll"
       }}
     >
       <AppBar
@@ -328,15 +331,16 @@ export default function NftPage() {
         <Typography sx={{ color: "#888", fontSize: "13px" }} onClick={goPage}>{t('transferOutList')}</Typography>
       </Box>
 
-      <DataLoader
-        loading={incomeLoading}
-        error={incomeError}
-        data={incomeData}
-        refetch={incomeRefetch}
-      >
-        <Box>
-          <Paper sx={{ borderRadius: 2, boxShadow: "none", p: 2, backgroundColor: "#F1EFF9" }}>
-            <List sx={{ py: 0 }}>
+
+      <Box>
+        <Paper sx={{ borderRadius: 2, boxShadow: "none", p: 2, backgroundColor: "#F1EFF9" }}>
+          <List sx={{ py: 0 }}>
+            <DataLoader
+              loading={incomeLoading}
+              error={incomeError}
+              data={incomeData}
+              onRetry={incomeRefetch}
+            >
               {incomeData?.map((item, index) => (
                 <ListItem
                   key={item.id}
@@ -344,8 +348,8 @@ export default function NftPage() {
                     bgcolor: "#FFF",
                     borderRadius: "12px",
                     display: "flex",
-                    alignItems: "center",
                     justifyContent: "space-between",
+                    alignItems: "center",
                     p: "16px",
                     mb: index === incomeData?.length - 1
                       ? 0 : "12px"
@@ -367,25 +371,41 @@ export default function NftPage() {
                       {t('assets.text22')}
                     </Typography>
                   </Box>
-
-
-                  {/* 日期 */}
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      fontSize: "14px",
-                      color: "#95BE25"
-                    }}
-                  >
-                    {item.amount}
-                  </Typography>
+                  <Box sx={{ display: "flex", flexDirection: "column", alignItems: "end" }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontSize: "14px",
+                        color: "#95BE25",
+                        textAlign: "right"
+                      }}
+                    >
+                      {item.amount}
+                    </Typography>
+                    {/* 日期 */}
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontSize: "14px",
+                        color: "#444",
+                        textAlign: "right"
+                      }}
+                    >
+                      {item.create_time}
+                    </Typography>
+                  </Box>
                 </ListItem>
               ))}
-            </List>
-          </Paper>
+            </DataLoader>
+            <LoadMore
+              loading={loading}
+              hasMore={pagination.hasMore}
+              onLoadMore={loadMore}
+            />
+          </List>
+        </Paper>
 
-        </Box>
-      </DataLoader>
+      </Box>
       <ConfirmDialog
         open={dialogOpen}
         onClose={handleCloseDialog}

@@ -1,4 +1,4 @@
-import React, { useState ,useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import RewardHeader from "../../components/RewardHeader";
 import { Box, Typography, Button, IconButton, Paper } from "@mui/material";
 import { useTranslation } from "react-i18next";
@@ -11,7 +11,7 @@ import { useSnackbar } from "../../utils/SnackbarContext";
 import { useWalletReady } from "../../utils/WalletReadyContext";
 import { useUser } from "../../utils/UserContext";
 const MyCommunityPage = () => {
-  const { team, loading, error ,refetch} = useGetMyTeam();
+  const { team, loading, error, refetch } = useGetMyTeam();
   const { t } = useTranslation()
   const { showSnackbar } = useSnackbar();
   const { isLoggedIn, userInfo } = useUser(); // 获取登录状态和用户信息
@@ -36,13 +36,14 @@ const MyCommunityPage = () => {
   return (
     <Box
       sx={{
-        minHeight: "100vh",
+        height: "100vh",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         px: "12px",
         width: "100%",
         boxSizing: "border-box",
+        overflow:"scroll"
       }}
     >
       {/* 顶部导航 */}
@@ -329,7 +330,7 @@ const MyCommunityPage = () => {
                       {t("community.text7")}
                     </Typography>
                     <Typography variant="body2" sx={{ fontWeight: "bold" }}>
-                      {member.contribution + t("community.text8")}
+                      {(member.pledge_balance || 0) + t("community.text8")}
                     </Typography>
                   </Box>
 
@@ -346,7 +347,7 @@ const MyCommunityPage = () => {
                       {t("community.text9")}
                     </Typography>
                     <Typography variant="body2" sx={{ fontWeight: "bold" }}>
-                      {member.personalValue}
+                      {member.person_contribution_value || 0}
                     </Typography>
                   </Box>
 
@@ -362,7 +363,7 @@ const MyCommunityPage = () => {
                       {t("community.text10")}
                     </Typography>
                     <Typography variant="body2" sx={{ fontWeight: "bold" }}>
-                      {member.communityValue}
+                      {member.communityValue || 0 }
                     </Typography>
                   </Box>
                 </Box>

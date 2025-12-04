@@ -71,15 +71,15 @@ const Reward = () => {
 
   const currentDate = useCurrentDate();
   const levels = [
-    { level: "F1", color: "linear-gradient(270deg, #8D8D74 0%, #272720 100%)", icon: require("../../static/image/pages/level/F1.png") },
-    { level: "F2", color: "linear-gradient(270deg, #B08564 0%, #4A382A 100%)", icon: require("../../static/image/pages/level/F2.png") },
-    { level: "F3", color: "linear-gradient(270deg, #8D94BB 0%, #404355 100%)", icon: require("../../static/image/pages/level/F3.png") },
-    { level: "F4", color: "linear-gradient(270deg, #E8C97B 0%, #4D3B00 100%)", icon: require("../../static/image/pages/level/F4.png") },
+    { level: "F9", color: "linear-gradient(270deg, #8D8D74 0%, #272720 100%)", icon: require("../../static/image/pages/level/F9.png") },
+    { level: "F8", color: "linear-gradient(270deg, #B08564 0%, #4A382A 100%)", icon: require("../../static/image/pages/level/F8.png") },
+    { level: "F7", color: "linear-gradient(270deg, #8D94BB 0%, #404355 100%)", icon: require("../../static/image/pages/level/F7.png") },
+    { level: "F6", color: "linear-gradient(270deg, #E8C97B 0%, #4D3B00 100%)", icon: require("../../static/image/pages/level/F6.png") },
     { level: "F5", color: "linear-gradient(270deg, #81A3DF 0%, #363C58 100%)", icon: require("../../static/image/pages/level/F5.png") },
-    { level: "F6", color: "linear-gradient(270deg, #6B8CF8 0%, #243A68 100%)", icon: require("../../static/image/pages/level/F6.png") },
-    { level: "F7", color: "linear-gradient(270deg, #A974DF 0%, #491974 100%)", icon: require("../../static/image/pages/level/F7.png") },
-    { level: "F8", color: "linear-gradient(270deg, #9F3085 0%, #4E0D40 100%)", icon: require("../../static/image/pages/level/F8.png") },
-    { level: "F9", color: "linear-gradient(270deg, #7B5711 0%, #5C0922 100%)", icon: require("../../static/image/pages/level/F9.png") },
+    { level: "F4", color: "linear-gradient(270deg, #6B8CF8 0%, #243A68 100%)", icon: require("../../static/image/pages/level/F4.png") },
+    { level: "F3", color: "linear-gradient(270deg, #A974DF 0%, #491974 100%)", icon: require("../../static/image/pages/level/F3.png") },
+    { level: "F2", color: "linear-gradient(270deg, #9F3085 0%, #4E0D40 100%)", icon: require("../../static/image/pages/level/F2.png") },
+    { level: "F1", color: "linear-gradient(270deg, #7B5711 0%, #5C0922 100%)", icon: require("../../static/image/pages/level/F1.png") },
   ];
   // 安全处理：当 pool_total_amount 不存在、不是数组或为 0 时 fallback 为空数组，同时默认 account_balance 为 0
   const poolMap = Object.fromEntries(
@@ -390,7 +390,7 @@ const Reward = () => {
                 variant="body2"
                 style={{ color: "#333", fontSize: "14px" }}
               >
-                {tab === 0 ? rewardData.extra.invite_count + t("reward.text9") : userLevel || "F9"}
+                {tab === 0 ? rewardData.extra.invite_count + t("reward.text9") : userLevel || t("reward.text22")}
               </Typography>
             </Box>
             <Box
@@ -567,7 +567,7 @@ const Reward = () => {
                               variant="body1"
                               sx={{ fontSize: "14px", color: "#333" }}
                             >
-                              {item.user_level || "F9" + t('reward.text11')}
+                              {item.user_level + t('reward.text11') || "F9"}
                             </Typography>
                             <Typography
                               variant="body1"

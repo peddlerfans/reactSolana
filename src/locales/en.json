@@ -31,6 +31,7 @@
     "990403": "The business service has not been started, please try again later",
     "990404": "No contribution record found",
     "990405": "Abnormal contribution amount record",
+    "990402": "No airdrop reward records found",
     "drawer": {
         "text1": "My Account",
         "text2": "Assets",
@@ -83,7 +84,10 @@
         "text37": "Withdrawal Failed, Awaiting Refund Review",
         "text38": "Review Approved, Refund Issued",
         "text39": "Backend Review Failed",
-        "text40": "Coefficient"
+        "text40": "Coefficient",
+        "text41": "Entering Status",
+        "text42": "Success",
+        "text43": "Failure"
     },
     "reward": {
         "text1": "Community Rewards",
@@ -106,7 +110,8 @@
         "text18": "Current Level",
         "text19": "None",
         "text20": "Regional Contribution Value",
-        "text21": "Community Contribution Value"
+        "text21": "Community Contribution Value",
+        "text22": "Regular User"
     },
     "nft": {
         "text1": "NFT Bonus Pool",
@@ -233,6 +238,8 @@
         "text8": "Trading data format error",
         "text9": "Insufficient withdrawable amount",
         "text10": "Insufficient remaining reward amount",
-        "text11": "Insufficient token balance"
+        "text11": "Insufficient token balance",
+        "text12": "Address binding successful",
+        "text13": "The amount transferred in must be greater than the last transfer in {{value}}."
     }
 }

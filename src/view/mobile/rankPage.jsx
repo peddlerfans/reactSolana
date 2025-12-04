@@ -104,7 +104,7 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: 12,
   },
   rankIndex: {
-    width: 36,
+    width: 30,
     textAlign: "center",
     color: "#9b9b9b",
     fontWeight: 600,
@@ -513,6 +513,8 @@ export default function RewardRankingPage() {
                             style={{
                               fontSize: "14px",
                               color: "#444",
+                              textAlign:"center",
+                              flex:1
                             }}
                           >
                             {it.user.mail}
@@ -523,15 +525,19 @@ export default function RewardRankingPage() {
                             style={{
                               color: "#9653FF",
                               fontSize: "14px",
+                              textAlign:"center",
+                              flex:1
                             }}
                           >
-                            {it.amount}{t('trump')}
+                            {it.amount || it.today_pledge_amount}{t('trump')}
                           </Typography>
 
                           <Typography
                             style={{
+                              width:"25px",
                               fontSize: "14px",
                               color: "#95BE25",
+                              textAlign:"center",
                             }}
                           >
                             {it.percent+'%'}

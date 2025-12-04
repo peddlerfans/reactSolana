@@ -176,7 +176,7 @@ const Header: React.FC<{ showWallet?: boolean, address?: string }> = ({ showWall
                     </IconButton>
                     <Drawer anchor="left" open={open} onClose={toggleDrawer(false)}
                         sx={{
-                            zIndex: 9999,
+                            zIndex: 9997,
                             pointerEvents: "auto",
                         }}
                     >

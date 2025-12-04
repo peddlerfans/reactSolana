@@ -108,6 +108,19 @@ const RewardPage = () => {
     }
   }
 
+  const getInStatus = (status) => {
+    switch (status) {
+      case 0:
+        return t("assets.text34");
+      case 1:
+        return t("assets.text42");
+      case 2:
+        return t("assets.text43");
+      default:
+        break;
+    }
+  }
+
   // 🌟 关键：监听登录状态变化，重新请求数据
   useEffect(() => {
     console.log("登录状态变化", {
@@ -421,6 +434,17 @@ const RewardPage = () => {
                           >
                             {item.create_time || "2024-01-01"} {/* 根据你的数据结构调整 */}
                           </Typography>
+                          {/* 提现状态 */}
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              textAlign: "center",
+                              color: "#999",
+                              fontSize: "14px"
+                            }}
+                          >
+                            {t("assets.text41")} {/* 根据你的数据结构调整 */}
+                          </Typography>
                         </Box>
                         <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
                           {/* 数量 */}
@@ -446,7 +470,19 @@ const RewardPage = () => {
                               fontSize: "13px"
                             }}
                           >
-                            {t('assets.text40') + ': ' + (item.coefficient || "1.0")} {/* 根据你的数据结构调整 */}
+                            {t('assets.text40') + ': ' + (item.days)} {/* 根据你的数据结构调整 */}
+                          </Typography>
+
+                          {/* 状态 */}
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              textAlign: "center",
+                              color: "#333",
+                              fontSize: "14px"
+                            }}
+                          >
+                            {getInStatus(item.status)}
                           </Typography>
                         </Box>
                       </Box>

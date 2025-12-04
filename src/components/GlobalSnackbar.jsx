@@ -8,6 +8,9 @@ export default function GlobalSnackbar({ open, onClose, message, severity = "suc
             autoHideDuration={2000}
             onClose={onClose}
             anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+            sx={{
+                zIndex:9998
+            }}
         >
             <Alert
                 onClose={onClose}

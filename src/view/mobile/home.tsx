@@ -72,6 +72,11 @@ const TodoList = () => {
       return;
     }
 
+    if (userInfo.pledge_amount >= Number(inputValue)) {
+      showSnackbar(t("error.text13", { value: userInfo.pledge_amount }) || "必须输入10的倍数", "error");
+      return;
+    }
+
     if (Number(inputValue) % 10 !== 0) {
       showSnackbar(t("assets.text20") || "必须输入10的倍数", "error");
       return;
@@ -89,12 +94,14 @@ const TodoList = () => {
       const transactionData = await transfer(inputValue, publicKey.toString())
       console.log(transactionData);
 
-      await signSingleTransfer(transactionData?.data.transactions[0]);
-      const transferStatus: any = await apiService.user.setPledge({ amount: inputValue })
+      let res = await signSingleTransfer(transactionData?.data.transactions[0]);
+      console.log(res);
+
+      const transferStatus: any = await apiService.user.setPledge({ amount: inputValue, signature: res })
       if (transferStatus.code === 200) {
         showSnackbar(t("sign.text9"), "success");
-      }else{
-        showSnackbar(t(`${transferStatus.code}`), "success");
+      } else {
+        showSnackbar(t(`${transferStatus.code}`), "error");
       }
       hideLoading()
     } catch (error: any) {
